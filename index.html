@@ -74,12 +74,10 @@
         
         .reserved-btn {
             background-color: #FF9800;
-            cursor: not-allowed;
         }
         
         .paid-btn {
             background-color: #000000;
-            cursor: not-allowed;
         }
         
         .selected-btn {
@@ -365,11 +363,19 @@
                     adminPanel.style.display = 'block';
                     loginBtn.textContent = 'Admin Logado';
                     loginBtn.disabled = true;
+                    // Recarregar números para atualizar as permissões
+                    database.ref('raffleNumbers').once('value').then(snapshot => {
+                        renderRaffleNumbers(snapshot.val());
+                    });
                 } else {
                     isAdmin = false;
                     adminPanel.style.display = 'none';
                     loginBtn.textContent = 'Login Admin';
                     loginBtn.disabled = false;
+                    // Recarregar números para atualizar as permissões
+                    database.ref('raffleNumbers').once('value').then(snapshot => {
+                        renderRaffleNumbers(snapshot.val());
+                    });
                 }
             });
             
@@ -443,16 +449,8 @@
                 btn.dataset.number = i;
                 btn.dataset.status = numberData.status;
                 
-                // Desabilitar cliques em reservados/pagos para não-admins
-                if (!isAdmin && numberData.status !== 'available') {
-                    btn.onclick = () => {
-                        alert(`Número ${formatNumber(i)} ${numberData.status === 'reserved' ? 
-                              `reservado por: ${numberData.user?.name || 'N/A'}` : 
-                              'já foi pago'}`);
-                    };
-                } else {
-                    btn.onclick = () => handleNumberClick(i, numberData.status, numberData.user);
-                }
+                // Configurar comportamento do clique
+                btn.onclick = () => handleNumberClick(i, numberData.status, numberData.user);
                 
                 // Verificar se o número está selecionado
                 if (selectedNumbers.includes(i)) {
@@ -472,6 +470,7 @@
         // Manipular clique em um número
         function handleNumberClick(number, status, user) {
             if (isAdmin) {
+                // Comportamento para administrador
                 currentAdminNumber = number;
                 adminNumber.textContent = formatNumber(number);
                 adminStatus.textContent = getStatusText(status);
@@ -493,9 +492,10 @@
                 
                 adminModal.style.display = 'block';
             } else {
+                // Comportamento para usuário normal
                 if (status !== 'available') {
                     const statusMsg = status === 'reserved' 
-                        ? `Número ${formatNumber(number)} já reservado por: ${user?.name || 'N/A'}`
+                        ? `Número ${formatNumber(number)} já reservado por: ${user?.name || 'N/A'}` 
                         : `Número ${formatNumber(number)} já foi pago e não está disponível.`;
                     
                     alert(statusMsg);
@@ -674,7 +674,7 @@
             const email = emailInput.value.trim();
             const password = passwordInput.value.trim();
             
-            if (email !== "bioranss@gmail.com") {
+            if (!email || !password) {
                 loginError.style.display = 'block';
                 return;
             }
@@ -687,6 +687,10 @@
                         adminPanel.style.display = 'block';
                         loginBtn.textContent = 'Admin Logado';
                         loginBtn.disabled = true;
+                        // Recarregar números para atualizar as permissões
+                        database.ref('raffleNumbers').once('value').then(snapshot => {
+                            renderRaffleNumbers(snapshot.val());
+                        });
                     } else {
                         throw new Error('Acesso não autorizado');
                     }
@@ -705,6 +709,10 @@
                     adminPanel.style.display = 'none';
                     loginBtn.textContent = 'Login Admin';
                     loginBtn.disabled = false;
+                    // Recarregar números para atualizar as permissões
+                    database.ref('raffleNumbers').once('value').then(snapshot => {
+                        renderRaffleNumbers(snapshot.val());
+                    });
                 })
                 .catch(error => {
                     console.error('Erro no logout:', error);
