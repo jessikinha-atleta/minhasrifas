@@ -525,7 +525,7 @@
         // Abrir modal de compra
         function openBuyModal() {
             selectedNumbersList.textContent = selectedNumbers.map(n => formatNumber(n)).join(', ');
-            totalValue.textContent = selectedNumbers.length * 10;
+            totalValue.textContent = selectedNumbers.length * 5;
             buyModal.style.display = 'block';
             nameInput.value = '';
             phoneInput.value = '';
@@ -549,7 +549,7 @@
 
             const userData = { name, phone };
             const formattedNumbers = selectedNumbers.map(n => formatNumber(n)).join(', ');
-            const total = selectedNumbers.length * 10;
+            const total = selectedNumbers.length * 5;
 
             // Mostrar spinner e desabilitar botão
             buySpinner.style.display = 'block';
@@ -663,7 +663,7 @@
             // Atualiza a lista no modal se estiver aberto
             if (buyModal.style.display === 'block') {
                 selectedNumbersList.textContent = selectedNumbers.map(n => formatNumber(n)).join(', ');
-                totalValue.textContent = selectedNumbers.length * 10;
+                totalValue.textContent = selectedNumbers.length * 5;
             }
         }
         
