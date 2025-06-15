@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rifa Online</title>
+    <link rel="icon" href="https://github.com/jessikinha-atleta/minhasrifas/raw/main/faviconjeh.png" type="image/png">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -197,6 +198,26 @@
             margin: 20px auto;
         }
         
+        .contact-btn {
+            background-color: #9C27B0;
+            margin-top: 10px;
+        }
+        
+        .contact-info {
+            background-color: #ffffff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            text-align: center;
+            display: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .contact-info p {
+            margin: 5px 0;
+            line-height: 1.5;
+        }
+        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
@@ -207,10 +228,10 @@
     <h1 style="text-align: center;">Óculos de Sol HB Grinder</h1>
     <p style="text-align: center; margin-top: 10px; margin-bottom: 20px;">Escolha seus números e boa sorte!</p>
     <div style="text-align: center; margin: 20px 0;">
-    <img src="https://raw.githubusercontent.com/jessikinha-atleta/minhasrifas/main/premio.jpg" 
-         alt="Prêmio da rifa" 
-         style="max-width: 100%; max-height: 300px; border-radius: 8px;">
-</div>
+        <img src="https://raw.githubusercontent.com/jessikinha-atleta/minhasrifas/main/premio.jpg" 
+             alt="Prêmio da rifa" 
+             style="max-width: 100%; max-height: 300px; border-radius: 8px;">
+    </div>
     
     <div class="status-container">
         <div class="status-box available">
@@ -232,6 +253,12 @@
         <button id="buy-btn" class="btn btn-primary" disabled>Comprar números selecionados</button>
         <div class="login-container" id="login-section">
             <button id="login-btn" class="btn login-btn">Login Admin</button>
+        </div>
+        <button id="contact-btn" class="btn contact-btn">Contato</button>
+        <div id="contact-info" class="contact-info">
+            <p><strong>Jéssica dos Reis</strong></p>
+            <p>(12) 99747-3756</p>
+            <p>@jessikinha.atleta</p>
         </div>
     </div>
     
@@ -351,6 +378,8 @@
         const markPaidBtn = document.getElementById('mark-paid-btn');
         const removeReservationBtn = document.getElementById('remove-reservation-btn');
         const buySpinner = document.getElementById('buy-spinner');
+        const contactBtn = document.getElementById('contact-btn');
+        const contactInfo = document.getElementById('contact-info');
         
         // Função para formatar números com 3 dígitos
         function formatNumber(num) {
@@ -400,6 +429,7 @@
             loginBtn.addEventListener('click', openLoginModal);
             confirmLoginBtn.addEventListener('click', loginAdmin);
             logoutBtn.addEventListener('click', logoutAdmin);
+            contactBtn.addEventListener('click', toggleContactInfo);
             
             // Fechar modais ao clicar no X
             for (let i = 0; i < closeButtons.length; i++) {
@@ -414,6 +444,15 @@
                     event.target.style.display = 'none';
                 }
             });
+        }
+        
+        // Alternar exibição das informações de contato
+        function toggleContactInfo() {
+            if (contactInfo.style.display === 'block') {
+                contactInfo.style.display = 'none';
+            } else {
+                contactInfo.style.display = 'block';
+            }
         }
         
         // Inicializar os números da rifa no Firebase
