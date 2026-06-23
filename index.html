@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Minhas Rifas</title>
+    <title>Rifa Xterra Malta 2027</title>
     <link rel="icon" href="https://github.com/jessikinha-atleta/minhasrifas/raw/main/faviconjeh.png" type="image/png">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -11,799 +11,1223 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <style>
+        :root {
+            --primary: #2196F3;
+            --success: #4CAF50;
+            --warning: #FF9800;
+            --danger: #F44336;
+            --dark: #000000;
+            --gray: #9E9E9E;
+            --light-gray: #f5f5f5;
+            --white: #ffffff;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+            --border-radius: 8px;
+            --transition: all 0.3s ease;
+        }
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
         body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            max-width: 900px;
             margin: 0 auto;
             padding: 20px;
-            background-color: #f5f5f5;
+            background-color: var(--light-gray);
+            color: #333;
+            line-height: 1.6;
         }
-        
-        .status-container {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 20px;
-        }
-        
-        .status-box {
-            padding: 10px 15px;
-            border-radius: 5px;
-            color: white;
-            font-weight: bold;
+        .header {
             text-align: center;
-            flex: 1;
-            margin: 0 5px;
+            margin-bottom: 30px;
         }
-        
-        .available {
-            background-color: #4CAF50;
+        .header h1 {
+            font-size: 2rem;
+            color: var(--dark);
+            margin-bottom: 5px;
         }
-        
-        .reserved {
-            background-color: #FF9800;
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
         }
-        
-        .paid {
-            background-color: #000000;
-        }
-        
-        .numbers-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        
-        .number-btn {
-            padding: 10px;
-            border: none;
-            border-radius: 5px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-            text-align: center;
-            transition: all 0.3s;
-        }
-        
-        .number-btn:hover {
-            transform: scale(1.05);
-        }
-        
-        .available-btn {
-            background-color: #4CAF50;
-        }
-        
-        .reserved-btn {
-            background-color: #FF9800;
-        }
-        
-        .paid-btn {
-            background-color: #000000;
-        }
-        
-        .selected-btn {
-            border: 3px solid #2196F3;
-            box-sizing: border-box;
-        }
-        
-        .processing-btn {
-            background-color: #9E9E9E;
-            cursor: wait;
-        }
-        
-        .action-buttons {
+        .prize-image {
             text-align: center;
             margin: 20px 0;
         }
-        
+        .prize-image img {
+            max-width: 100%;
+            max-height: 700px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+        .status-box {
+            padding: 20px 15px;
+            border-radius: var(--border-radius);
+            color: var(--white);
+            font-weight: bold;
+            text-align: center;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+        .status-box:hover {
+            transform: translateY(-2px);
+        }
+        .status-box.available { background: linear-gradient(135deg, #4CAF50, #45a049); }
+        .status-box.reserved { background: linear-gradient(135deg, #FF9800, #e68900); }
+        .status-box.paid { background: linear-gradient(135deg, #000000, #333333); }
+        .status-box span {
+            display: block;
+            font-size: 2.5rem;
+            margin-top: 5px;
+            font-weight: bold;
+        }
+        .status-box .label {
+            font-size: 1rem;
+            font-weight: normal;
+            opacity: 0.9;
+        }
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin: 20px 0;
+        }
         .btn {
-            padding: 10px 20px;
+            padding: 12px 24px;
             border: none;
-            border-radius: 5px;
-            color: white;
+            border-radius: var(--border-radius);
+            color: var(--white);
             font-weight: bold;
             cursor: pointer;
-            margin: 0 10px;
+            transition: var(--transition);
+            font-size: 1rem;
+            min-width: 120px;
+            text-align: center;
         }
-        
-        .btn-primary {
-            background-color: #2196F3;
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
         }
-        
-        .btn-success {
-            background-color: #4CAF50;
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
         }
-        
-        .btn-danger {
-            background-color: #F44336;
+        .btn-primary { background: linear-gradient(135deg, #2196F3, #1976D2); }
+        .btn-success { background: linear-gradient(135deg, #4CAF50, #388E3C); }
+        .btn-danger { background: linear-gradient(135deg, #F44336, #D32F2F); }
+        .btn-warning { background: linear-gradient(135deg, #FF9800, #F57C00); }
+        .btn-purple { background: linear-gradient(135deg, #9C27B0, #7B1FA2); }
+        .btn-info { background: linear-gradient(135deg, #00BCD4, #0097A7); }
+        .btn-dark { background: linear-gradient(135deg, #333, #111); }
+        .contact-info {
+            background: var(--white);
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin: 10px auto;
+            display: none;
+            box-shadow: var(--shadow);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
         }
-        
+        .contact-info p {
+            margin: 5px 0;
+            line-height: 1.5;
+        }
+        .contact-info .highlight {
+            color: var(--primary);
+            font-weight: bold;
+        }
+        .admin-panel {
+            margin-top: 30px;
+            padding: 20px;
+            background: var(--white);
+            border-radius: var(--border-radius);
+            display: none;
+            box-shadow: var(--shadow);
+            border-left: 4px solid var(--primary);
+        }
+        .admin-panel h2 {
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+        .admin-panel .admin-status {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 15px;
+        }
+        .admin-panel .admin-status .badge {
+            background: var(--success);
+            color: var(--white);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        .admin-panel .transaction-search {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+        }
+        .admin-panel .transaction-search input {
+            flex: 1;
+            min-width: 200px;
+            padding: 10px 12px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+        .admin-panel .transaction-search input:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+        }
+        .admin-panel .transaction-result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            display: none;
+        }
+        .admin-panel .transaction-result .transaction-numbers {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 10px 0;
+        }
+        .admin-panel .transaction-result .transaction-number {
+            background: var(--primary);
+            color: var(--white);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
         .modal {
             display: none;
             position: fixed;
-            z-index: 1;
+            z-index: 1000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
             overflow: auto;
-            background-color: rgba(0,0,0,0.4);
+            background-color: rgba(0,0,0,0.5);
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.3s ease;
         }
-        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
         .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto;
-            padding: 20px;
-            border: 1px solid #888;
-            width: 80%;
+            background-color: var(--white);
+            margin: 10% auto;
+            padding: 25px;
+            border-radius: var(--border-radius);
+            width: 90%;
             max-width: 500px;
-            border-radius: 5px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+            animation: slideDown 0.3s ease;
         }
-        
+        @keyframes slideDown {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .modal-header h2 {
+            margin: 0;
+            color: var(--dark);
+        }
         .close {
             color: #aaa;
-            float: right;
             font-size: 28px;
             font-weight: bold;
             cursor: pointer;
+            transition: var(--transition);
+            line-height: 1;
         }
-        
+        .close:hover {
+            color: var(--dark);
+            transform: rotate(90deg);
+        }
         .form-group {
             margin-bottom: 15px;
         }
-        
         .form-group label {
             display: block;
             margin-bottom: 5px;
             font-weight: bold;
+            color: #555;
         }
-        
-        .form-group input {
+        .form-group input, .form-group select {
             width: 100%;
-            padding: 8px;
+            padding: 10px 12px;
             box-sizing: border-box;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            border: 2px solid #ddd;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
         }
-        
-        .admin-panel {
-            margin-top: 30px;
-            padding: 20px;
-            background-color: #e9e9e9;
-            border-radius: 5px;
-            display: none;
+        .form-group input:focus, .form-group select:focus {
+            border-color: var(--primary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
         }
-        
-        .login-container {
-            text-align: center;
-            margin: 20px 0;
+        .form-group .info-text {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: var(--border-radius);
+            margin-top: 5px;
         }
-        
-        .login-btn {
-            background-color: #4CAF50;
-        }
-        
-        .logout-btn {
-            background-color: #F44336;
-        }
-        
         .loading-spinner {
             display: none;
             border: 4px solid rgba(0, 0, 0, 0.1);
             border-radius: 50%;
-            border-top: 4px solid #3498db;
-            width: 30px;
-            height: 30px;
+            border-top: 4px solid var(--primary);
+            width: 36px;
+            height: 36px;
             animation: spin 1s linear infinite;
-            margin: 20px auto;
+            margin: 15px auto;
         }
-        
-        .contact-btn {
-            background-color: #9C27B0;
-            margin-top: 10px;
-        }
-        
-        .contact-info {
-            background-color: #ffffff;
-            padding: 15px;
-            border-radius: 5px;
-            margin-top: 10px;
-            text-align: center;
-            display: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .contact-info p {
-            margin: 5px 0;
-            line-height: 1.5;
-        }
-        
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+        .error-message {
+            color: var(--danger);
+            display: none;
+            padding: 8px;
+            margin: 10px 0;
+            background: #ffebee;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--danger);
+        }
+        .success-message {
+            color: var(--success);
+            display: none;
+            padding: 8px;
+            margin: 10px 0;
+            background: #e8f5e9;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--success);
+        }
+        .prize-info {
+            background: #fff;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin: 15px 0;
+            box-shadow: var(--shadow);
+            border-left: 4px solid #FFD700;
+        }
+        .prize-info h3 {
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .prize-info ul {
+            list-style: none;
+            padding: 0;
+        }
+        .prize-info ul li {
+            padding: 4px 0;
+            font-size: 0.95rem;
+        }
+        .prize-info .date {
+            color: var(--danger);
+            font-weight: bold;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            z-index: 2000;
+            display: none;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        .toast.error { background: var(--danger); }
+        .toast.success { background: var(--success); }
+        .info-box {
+            background: #e3f2fd;
+            border: 2px dashed var(--primary);
+            border-radius: var(--border-radius);
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+            color: #555;
+        }
+        .info-box .icon {
+            font-size: 3rem;
+            display: block;
+            margin-bottom: 10px;
+        }
+        .info-box h3 {
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+        @media (max-width: 600px) {
+            .header h1 { font-size: 1.5rem; }
+            .modal-content { margin: 20% auto; padding: 20px; }
+            .action-buttons .btn { min-width: 100px; padding: 10px 16px; font-size: 0.9rem; }
+            .status-container { grid-template-columns: repeat(3, 1fr); gap: 5px; }
+            .status-box { padding: 15px 10px; }
+            .status-box span { font-size: 2rem; }
+            .admin-panel .transaction-search { flex-direction: column; }
+            .admin-panel .transaction-search input { min-width: unset; }
+        }
     </style>
 </head>
 <body>
-    <h1 style="text-align: center;">Óculos de Sol HB Grinder</h1>
-    <p style="text-align: center; margin-top: 10px; margin-bottom: 20px;">Escolha seus números e boa sorte!</p>
-    <div style="text-align: center; margin: 20px 0;">
+
+   <div class="prize-image">
         <img src="https://raw.githubusercontent.com/jessikinha-atleta/minhasrifas/main/premio.jpg" 
-             alt="Prêmio da rifa" 
-             style="max-width: 100%; max-height: 300px; border-radius: 8px;">
+             alt="Prêmio da rifa" loading="lazy">
     </div>
-    
+
+    <div class="prize-info">
+        <h3>Prêmios:</h3>
+        <ul>
+            <li>1º Sorteio: <strong>R$ 500,00</strong></li>
+            <li>2º Sorteio: <strong>R$ 300,00</strong></li>
+            <li>3º Sorteio: <strong>R$ 200,00</strong></li>
+        </ul>
+        <p>📅 Data do sorteio: A confirmar (após conclusão das vendas)</p>
+        <p>📱 Acompanhe no Instagram: <strong>@jessikinha.atleta</strong></p>
+        <p style="font-size:0.9rem; color:#666;">🎯 Resultado: 3 últimos algarismos (centena) do 1º, 2º e 3º prêmio da Loteria Federal.</p>
+    </div>
+
+    <div id="connection-status" style="text-align:center; padding:8px; background:#fff3cd; border-radius:8px; margin-bottom:15px; display:none;">
+        ⚠️ Aguardando conexão com o banco de dados...
+    </div>
+
     <div class="status-container">
         <div class="status-box available">
-            Disponíveis: <span id="available-count">100</span>
+            <span class="label">📦 Disponíveis</span>
+            <span id="available-count">--</span>
         </div>
         <div class="status-box reserved">
-            Reservados: <span id="reserved-count">0</span>
+            <span class="label">⏳ Reservados</span>
+            <span id="reserved-count">--</span>
         </div>
         <div class="status-box paid">
-            Pagos: <span id="paid-count">0</span>
+            <span class="label">💰 Pagos</span>
+            <span id="paid-count">--</span>
         </div>
     </div>
-    
-    <div class="numbers-grid" id="numbers-container">
-        <!-- Números serão gerados dinamicamente -->
+
+    <div class="info-box">
+        <p>Clique em "Comprar números" e escolha a quantidade desejada (até 10 por compra).</p>
+        <p>Os números serão obtidos aleatoriamente entre os disponíveis.</p>
+<p>Faça o pagamento via PIX para a chave 12 99747-3756 e envie o comprovante. </p>
+<p>Reservas não pagas em até 24 horas serão canceladas automaticamente.</p>
     </div>
-    
+
     <div class="action-buttons">
-        <button id="buy-btn" class="btn btn-primary" disabled>Comprar números selecionados</button>
-        <div class="login-container" id="login-section">
-            <button id="login-btn" class="btn login-btn">Login Admin</button>
-        </div>
-        <button id="contact-btn" class="btn contact-btn">Contato</button>
-        <div id="contact-info" class="contact-info">
-            <p><strong>Jéssica | (12) 99747-3756 | @jessikinha.atleta</strong></p>
-            </div>
+        <button id="buy-btn" class="btn btn-primary" disabled>🎯 Comprar números</button>
+        <button id="contact-btn" class="btn btn-purple">📱 Contato</button>
+        <button id="login-btn" class="btn btn-warning">🔑 Login Admin</button>
+        <button id="init-btn" class="btn btn-dark" style="display:none;">📦 Inicializar 1000 números</button>
     </div>
-    
+
+    <div id="contact-info" class="contact-info">
+        <p><span class="highlight">📞 Jéssica</span></p>
+        <p><span class="highlight">📱 (12) 99747-3756</span></p>
+        <p><span class="highlight">📷 @jessikinha.atleta</span></p>
+    </div>
+
     <div class="admin-panel" id="admin-panel">
-        <h2>Painel Administrativo</h2>
-        <p>Você está logado como administrador.</p>
-        <button id="logout-btn" class="btn logout-btn">Logout</button>
+        <h2>🔐 Painel Administrativo</h2>
+        <div class="admin-status">
+            <span>✅ Logado como admin.</span>
+            <span class="badge">Admin</span>
+        </div>
+        
+        <button id="show-all-numbers-btn" class="btn btn-info" style="margin-bottom:15px;">👁️ Ver todos os números</button>
+        
+        <div class="transaction-search">
+            <input type="text" id="transaction-search-input" placeholder="🔍 ID da transação (ex: TXN-000001)">
+            <button id="search-transaction-btn" class="btn btn-info">Buscar</button>
+        </div>
+        <div class="transaction-result" id="transaction-result">
+            <h3>📋 Detalhes</h3>
+            <div class="transaction-info">
+                <p><strong>ID:</strong> <span id="result-transaction-id"></span></p>
+                <p><strong>👤 Cliente:</strong> <span id="result-client-name"></span></p>
+                <p><strong>📱 Telefone:</strong> <span id="result-client-phone"></span></p>
+                <p><strong>📅 Data:</strong> <span id="result-date"></span></p>
+                <p><strong>💰 Valor:</strong> R$ <span id="result-total-value"></span></p>
+            </div>
+            <p><strong>🔢 Números:</strong></p>
+            <div class="transaction-numbers" id="result-numbers"></div>
+            <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+                <button id="mark-transaction-paid" class="btn btn-success">✅ Marcar Todos como Pago</button>
+                <button id="cancel-transaction" class="btn btn-danger">❌ Cancelar Transação</button>
+            </div>
+            <div id="transaction-action-message" class="success-message"></div>
+        </div>
+        <button id="logout-btn" class="btn btn-danger" style="margin-top:15px;">🚪 Logout</button>
     </div>
-    
+
     <!-- Modal de compra -->
     <div id="buy-modal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Finalizar Compra</h2>
-            <div class="form-group">
-                <label for="name">Nome Completo:</label>
-                <input type="text" id="name" required>
+            <div class="modal-header">
+                <h2>🎯 Comprar números</h2>
+                <span class="close">&times;</span>
             </div>
             <div class="form-group">
-                <label for="phone">Telefone:</label>
-                <input type="tel" id="phone" required>
+                <label for="quantity">🔢 Quantidade (máx 10):</label>
+                <select id="quantity">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                    <option value="5">5</option>
+                    <option value="6">6</option>
+                    <option value="7">7</option>
+                    <option value="8">8</option>
+                    <option value="9">9</option>
+                    <option value="10">10</option>
+                </select>
             </div>
             <div class="form-group">
-                <p>Números selecionados: <span id="selected-numbers-list"></span></p>
-                <p>Valor total: R$<span id="total-value">0</span>,00</p>
+                <label for="name">👤 Nome Completo:</label>
+                <input type="text" id="name" placeholder="Digite seu nome" required>
+            </div>
+            <div class="form-group">
+                <label for="phone">📱 Telefone:</label>
+                <input type="tel" id="phone" placeholder="(00) 00000-0000" required>
+            </div>
+            <div class="form-group">
+                <div class="info-text">
+                    <p>💰 Valor por número: <strong>R$ 10,00</strong></p>
+                    <p>📋 Total: R$ <span id="total-value">10</span>,00</p>
+                    <p style="font-size:0.9rem; color:#666;">Os números serão sorteados automaticamente entre os disponíveis.</p>
+                </div>
             </div>
             <div class="loading-spinner" id="buy-spinner"></div>
-            <button id="confirm-buy-btn" class="btn btn-success">Confirmar Compra</button>
+            <button id="confirm-buy-btn" class="btn btn-success" style="width:100%;">✅ Confirmar Compra</button>
         </div>
     </div>
-    
+
     <!-- Modal de login -->
     <div id="login-modal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Login Administrativo</h2>
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" required>
+            <div class="modal-header">
+                <h2>🔑 Login Admin</h2>
+                <span class="close">&times;</span>
             </div>
             <div class="form-group">
-                <label for="password">Senha:</label>
-                <input type="password" id="password" required>
+                <label for="email">📧 Email:</label>
+                <input type="email" id="email" placeholder="admin@exemplo.com">
             </div>
-            <button id="confirm-login-btn" class="btn btn-success">Login</button>
-            <p id="login-error" style="color: red; display: none;">Email ou senha incorretos.</p>
+            <div class="form-group">
+                <label for="password">🔒 Senha:</label>
+                <input type="password" id="password" placeholder="Digite sua senha">
+            </div>
+            <div class="error-message" id="login-error">❌ Email ou senha incorretos.</div>
+            <button id="confirm-login-btn" class="btn btn-success" style="width:100%;">Entrar</button>
         </div>
     </div>
-    
-    <!-- Modal de administração -->
+
+    <!-- Modal de admin individual -->
     <div id="admin-modal" class="modal">
         <div class="modal-content">
-            <span class="close">&times;</span>
-            <h2>Administrar Número</h2>
-            <p>Número: <span id="admin-number"></span></p>
-            <p>Status: <span id="admin-status"></span></p>
-            <div id="admin-user-info" style="display: none;">
-                <p>Nome: <span id="admin-name"></span></p>
-                <p>Telefone: <span id="admin-phone"></span></p>
+            <div class="modal-header">
+                <h2>⚙️ Administrar Número</h2>
+                <span class="close">&times;</span>
             </div>
-            <div id="admin-buttons" style="margin-top: 20px;">
-                <button id="mark-paid-btn" class="btn btn-success" style="display: none;">Marcar como Pago</button>
-                <button id="remove-reservation-btn" class="btn btn-danger" style="display: none;">Remover Reserva</button>
+            <p><strong>🔢 Número:</strong> <span id="admin-number"></span></p>
+            <p><strong>📌 Status:</strong> <span id="admin-status"></span></p>
+            <div id="admin-user-info" style="display:none; margin-top:10px; padding:10px; background:#f8f9fa; border-radius:var(--border-radius);">
+                <p><strong>👤 Nome:</strong> <span id="admin-name"></span></p>
+                <p><strong>📱 Telefone:</strong> <span id="admin-phone"></span></p>
+                <p><strong>🆔 Transação:</strong> <span id="admin-transaction-id"></span></p>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;">
+                <button id="mark-paid-btn" class="btn btn-success" style="display:none; flex:1;">✅ Marcar como Pago</button>
+                <button id="remove-reservation-btn" class="btn btn-danger" style="display:none; flex:1;">❌ Remover Reserva</button>
             </div>
         </div>
     </div>
-    
+
+    <!-- Modal para ver todos os números (admin) -->
+    <div id="all-numbers-modal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>👁️ Todos os Números</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div style="max-height: 500px; overflow-y: auto;">
+                <div id="all-numbers-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(50px, 1fr)); gap: 4px; padding: 10px;"></div>
+            </div>
+            <p style="margin-top: 10px; text-align: center; font-size: 0.9rem; color: #888;">
+                🟢 Disponível | 🟡 Reservado | ⚫ Pago
+            </p>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
     <script>
-        // Configuração do Firebase
+        // Firebase config
         const firebaseConfig = {
-  apiKey: "AIzaSyDPP15uSCboiNCjsVvr-NnYGi-L2ipkxOg",
-  authDomain: "ruc1-8ffc8.firebaseapp.com",
-  projectId: "ruc1-8ffc8",
-  storageBucket: "ruc1-8ffc8.firebasestorage.app",
-  messagingSenderId: "717998076767",
-  appId: "1:717998076767:web:483bd4e3bb084e39d6bcea"
-};
-        
-        // Inicializar Firebase
+            apiKey: "AIzaSyDLcPmipCR0tVCaDYQHecty2dnp-hmJW3k",
+            authDomain: "rifa-ca894.firebaseapp.com",
+            databaseURL: "https://rifa-ca894-default-rtdb.firebaseio.com",
+            projectId: "rifa-ca894",
+            storageBucket: "rifa-ca894.firebasestorage.app",
+            messagingSenderId: "908858195161",
+            appId: "1:908858195161:web:2b845760747823caa712c8"
+        };
+
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const auth = firebase.auth();
-        
-        // Variáveis globais
-        let selectedNumbers = [];
+
+        // Globals
         let isAdmin = false;
         let currentAdminNumber = null;
-        
-        // Elementos do DOM
-        const numbersContainer = document.getElementById('numbers-container');
-        const buyBtn = document.getElementById('buy-btn');
-        const availableCount = document.getElementById('available-count');
-        const reservedCount = document.getElementById('reserved-count');
-        const paidCount = document.getElementById('paid-count');
-        const buyModal = document.getElementById('buy-modal');
-        const loginModal = document.getElementById('login-modal');
-        const adminModal = document.getElementById('admin-modal');
-        const closeButtons = document.getElementsByClassName('close');
-        const confirmBuyBtn = document.getElementById('confirm-buy-btn');
-        const selectedNumbersList = document.getElementById('selected-numbers-list');
-        const totalValue = document.getElementById('total-value');
-        const nameInput = document.getElementById('name');
-        const phoneInput = document.getElementById('phone');
-        const loginBtn = document.getElementById('login-btn');
-        const confirmLoginBtn = document.getElementById('confirm-login-btn');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const loginError = document.getElementById('login-error');
-        const adminPanel = document.getElementById('admin-panel');
-        const logoutBtn = document.getElementById('logout-btn');
-        const adminNumber = document.getElementById('admin-number');
-        const adminStatus = document.getElementById('admin-status');
-        const adminName = document.getElementById('admin-name');
-        const adminPhone = document.getElementById('admin-phone');
-        const adminUserInfo = document.getElementById('admin-user-info');
-        const markPaidBtn = document.getElementById('mark-paid-btn');
-        const removeReservationBtn = document.getElementById('remove-reservation-btn');
-        const buySpinner = document.getElementById('buy-spinner');
-        const contactBtn = document.getElementById('contact-btn');
-        const contactInfo = document.getElementById('contact-info');
-        
-        // Função para formatar números com 3 dígitos
-        function formatNumber(num) {
-            return num.toString().padStart(3, '0');
+        let isProcessing = false;
+        let currentTransactionId = null;
+        const TOTAL_NUMBERS = 1000;
+        let isConnected = false;
+        let numbersData = null;
+
+        const elements = {
+            buyBtn: document.getElementById('buy-btn'),
+            availableCount: document.getElementById('available-count'),
+            reservedCount: document.getElementById('reserved-count'),
+            paidCount: document.getElementById('paid-count'),
+            buyModal: document.getElementById('buy-modal'),
+            loginModal: document.getElementById('login-modal'),
+            adminModal: document.getElementById('admin-modal'),
+            allNumbersModal: document.getElementById('all-numbers-modal'),
+            allNumbersGrid: document.getElementById('all-numbers-grid'),
+            confirmBuyBtn: document.getElementById('confirm-buy-btn'),
+            totalValue: document.getElementById('total-value'),
+            nameInput: document.getElementById('name'),
+            phoneInput: document.getElementById('phone'),
+            quantitySelect: document.getElementById('quantity'),
+            loginBtn: document.getElementById('login-btn'),
+            confirmLoginBtn: document.getElementById('confirm-login-btn'),
+            emailInput: document.getElementById('email'),
+            passwordInput: document.getElementById('password'),
+            loginError: document.getElementById('login-error'),
+            adminPanel: document.getElementById('admin-panel'),
+            logoutBtn: document.getElementById('logout-btn'),
+            adminNumber: document.getElementById('admin-number'),
+            adminStatus: document.getElementById('admin-status'),
+            adminName: document.getElementById('admin-name'),
+            adminPhone: document.getElementById('admin-phone'),
+            adminTransactionId: document.getElementById('admin-transaction-id'),
+            adminUserInfo: document.getElementById('admin-user-info'),
+            markPaidBtn: document.getElementById('mark-paid-btn'),
+            removeReservationBtn: document.getElementById('remove-reservation-btn'),
+            buySpinner: document.getElementById('buy-spinner'),
+            contactBtn: document.getElementById('contact-btn'),
+            contactInfo: document.getElementById('contact-info'),
+            transactionSearchInput: document.getElementById('transaction-search-input'),
+            searchTransactionBtn: document.getElementById('search-transaction-btn'),
+            transactionResult: document.getElementById('transaction-result'),
+            resultTransactionId: document.getElementById('result-transaction-id'),
+            resultClientName: document.getElementById('result-client-name'),
+            resultClientPhone: document.getElementById('result-client-phone'),
+            resultDate: document.getElementById('result-date'),
+            resultTotalValue: document.getElementById('result-total-value'),
+            resultNumbers: document.getElementById('result-numbers'),
+            markTransactionPaid: document.getElementById('mark-transaction-paid'),
+            cancelTransaction: document.getElementById('cancel-transaction'),
+            transactionActionMessage: document.getElementById('transaction-action-message'),
+            initBtn: document.getElementById('init-btn'),
+            connectionStatus: document.getElementById('connection-status'),
+            toast: document.getElementById('toast'),
+            showAllNumbersBtn: document.getElementById('show-all-numbers-btn')
+        };
+
+        const formatNumber = (num) => num.toString().padStart(3, '0');
+        const generateTransactionId = () => {
+            const ts = Date.now().toString().slice(-6);
+            const rand = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            return `TXN-${ts}${rand}`;
+        };
+        const getStatusText = (s) => ({ available: 'Disponível ✅', reserved: 'Reservado ⏳', paid: 'Pago 💰' }[s] || s);
+
+        function showToast(message, type = '') {
+            const toast = elements.toast;
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            toast.style.display = 'block';
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => { toast.style.display = 'none'; }, 5000);
         }
-        
-        // Inicializar a aplicação
+
         function initApp() {
-            // Configurar máscara de telefone
             $('#phone').mask('(00) 00000-0000');
-            
-            // Verificar estado de autenticação
+
+            database.ref('.info/connected').on('value', snap => {
+                isConnected = snap.val() === true;
+                elements.connectionStatus.style.display = isConnected ? 'none' : 'block';
+                if (isConnected) {
+                    loadNumbers();
+                }
+            });
+
             auth.onAuthStateChanged(user => {
-                if (user && user.email === "bioranss@gmail.com") {
-                    isAdmin = true;
-                    adminPanel.style.display = 'block';
-                    loginBtn.textContent = 'Admin Logado';
-                    loginBtn.disabled = true;
-                    // Recarregar números para atualizar as permissões
-                    database.ref('raffleNumbers').once('value').then(snapshot => {
-                        renderRaffleNumbers(snapshot.val());
-                    });
+                const authorized = user && user.uid === "0kVyR8O6Wedq881t6EZJOu528Fw1";
+                isAdmin = authorized;
+                if (authorized) {
+                    elements.adminPanel.style.display = 'block';
+                    elements.loginBtn.textContent = '✅ Admin Logado';
+                    elements.loginBtn.disabled = true;
+                    elements.showAllNumbersBtn.style.display = 'inline-block';
                 } else {
-                    isAdmin = false;
-                    adminPanel.style.display = 'none';
-                    loginBtn.textContent = 'Login Admin';
-                    loginBtn.disabled = false;
-                    // Recarregar números para atualizar as permissões
-                    database.ref('raffleNumbers').once('value').then(snapshot => {
-                        renderRaffleNumbers(snapshot.val());
-                    });
+                    elements.adminPanel.style.display = 'none';
+                    elements.loginBtn.textContent = '🔑 Login Admin';
+                    elements.loginBtn.disabled = false;
+                    elements.transactionResult.style.display = 'none';
+                    elements.showAllNumbersBtn.style.display = 'none';
                 }
+                if (isConnected) loadNumbers();
             });
-            
-            // Carregar números da rifa com atualização em tempo real
-            database.ref('raffleNumbers').on('value', snapshot => {
-                if (!snapshot.exists()) {
-                    initializeRaffleNumbers();
-                } else {
-                    renderRaffleNumbers(snapshot.val());
-                }
-            });
-            
-            // Event listeners
-            buyBtn.addEventListener('click', openBuyModal);
-            confirmBuyBtn.addEventListener('click', confirmPurchase);
-            loginBtn.addEventListener('click', openLoginModal);
-            confirmLoginBtn.addEventListener('click', loginAdmin);
-            logoutBtn.addEventListener('click', logoutAdmin);
-            contactBtn.addEventListener('click', toggleContactInfo);
-            
-            // Fechar modais ao clicar no X
-            for (let i = 0; i < closeButtons.length; i++) {
-                closeButtons[i].addEventListener('click', function() {
-                    this.closest('.modal').style.display = 'none';
+
+            elements.buyBtn.addEventListener('click', openBuyModal);
+            elements.confirmBuyBtn.addEventListener('click', confirmPurchase);
+            elements.loginBtn.addEventListener('click', openLoginModal);
+            elements.confirmLoginBtn.addEventListener('click', loginAdmin);
+            elements.logoutBtn.addEventListener('click', logoutAdmin);
+            elements.contactBtn.addEventListener('click', toggleContact);
+            elements.searchTransactionBtn.addEventListener('click', searchTransaction);
+            elements.markTransactionPaid.addEventListener('click', markTransactionPaid);
+            elements.cancelTransaction.addEventListener('click', cancelTransaction);
+            elements.initBtn.addEventListener('click', initializeRaffleNumbers);
+            elements.showAllNumbersBtn.addEventListener('click', showAllNumbers);
+
+            elements.quantitySelect.addEventListener('change', updateTotal);
+            document.querySelectorAll('.close').forEach(el => {
+                el.addEventListener('click', function() { 
+                    const modal = this.closest('.modal');
+                    if (modal) modal.style.display = 'none';
                 });
-            }
-            
-            // Fechar modais ao clicar fora
-            window.addEventListener('click', function(event) {
-                if (event.target.className === 'modal') {
-                    event.target.style.display = 'none';
+            });
+            window.addEventListener('click', e => { 
+                if (e.target.classList.contains('modal')) e.target.style.display = 'none'; 
+            });
+            document.addEventListener('keydown', e => {
+                if (e.key === 'Enter') {
+                    if (elements.loginModal.style.display === 'block') loginAdmin();
+                    if (elements.buyModal.style.display === 'block') confirmPurchase();
                 }
             });
+            elements.transactionSearchInput.addEventListener('keypress', e => { 
+                if (e.key === 'Enter') searchTransaction(); 
+            });
+
+            if (isConnected) loadNumbers();
         }
-        
-        // Alternar exibição das informações de contato
-        function toggleContactInfo() {
-            if (contactInfo.style.display === 'block') {
-                contactInfo.style.display = 'none';
-            } else {
-                contactInfo.style.display = 'block';
-            }
+
+        function toggleContact() {
+            elements.contactInfo.style.display = elements.contactInfo.style.display === 'block' ? 'none' : 'block';
         }
-        
-        // Inicializar os números da rifa no Firebase
+
         function initializeRaffleNumbers() {
+            if (!confirm('Deseja inicializar os 1000 números? Isso irá resetar todos os dados existentes.')) return;
+            
+            elements.initBtn.disabled = true;
+            elements.initBtn.textContent = '⏳ Processando...';
+            
             const numbers = {};
-            for (let i = 1; i <= 100; i++) {
+            for (let i = 0; i < TOTAL_NUMBERS; i++) {
                 numbers[i] = { status: 'available' };
             }
             
             database.ref('raffleNumbers').set(numbers)
                 .then(() => {
-                    renderRaffleNumbers(numbers);
+                    showToast('✅ 1000 números inicializados com sucesso!', 'success');
+                    loadNumbers();
                 })
-                .catch(error => {
-                    console.error("Erro ao inicializar números:", error);
+                .catch(err => {
+                    console.error(err);
+                    showToast('❌ Erro ao inicializar: ' + err.message, 'error');
+                })
+                .finally(() => {
+                    elements.initBtn.disabled = false;
+                    elements.initBtn.textContent = '📦 Inicializar 1000 números';
                 });
         }
-        
-        // Renderizar os números da rifa
-        function renderRaffleNumbers(numbers) {
-            let available = 0;
-            let reserved = 0;
-            let paid = 0;
+
+        function loadNumbers() {
+            database.ref('raffleNumbers').once('value')
+                .then(snapshot => {
+                    if (!snapshot.exists()) {
+                        elements.initBtn.style.display = 'inline-block';
+                        elements.availableCount.textContent = '0';
+                        elements.reservedCount.textContent = '0';
+                        elements.paidCount.textContent = '0';
+                        elements.buyBtn.disabled = true;
+                        showToast('📦 Nenhum número encontrado. Clique em "Inicializar 1000 números" para começar.', '');
+                        return;
+                    }
+                    elements.initBtn.style.display = 'none';
+                    numbersData = snapshot.val();
+                    updateCounters(numbersData);
+                })
+                .catch(err => {
+                    console.error('Erro ao carregar números:', err);
+                    showToast('❌ Erro ao carregar dados: ' + err.message, 'error');
+                });
+        }
+
+        function updateCounters(data) {
+            let available = 0, reserved = 0, paid = 0;
+            for (let i = 0; i < TOTAL_NUMBERS; i++) {
+                const status = data[i]?.status || 'available';
+                if (status === 'available') available++;
+                else if (status === 'reserved') reserved++;
+                else if (status === 'paid') paid++;
+            }
+            elements.availableCount.textContent = available;
+            elements.reservedCount.textContent = reserved;
+            elements.paidCount.textContent = paid;
+            elements.buyBtn.disabled = isProcessing || available === 0;
+        }
+
+        function showAllNumbers() {
+            if (!isAdmin || !numbersData) return;
             
-            numbersContainer.innerHTML = '';
+            const grid = elements.allNumbersGrid;
+            grid.innerHTML = '';
             
-            for (let i = 1; i <= 100; i++) {
-                const numberData = numbers[i] || { status: 'available' };
-                
-                // Atualizar contadores
-                if (numberData.status === 'available') available++;
-                if (numberData.status === 'reserved') reserved++;
-                if (numberData.status === 'paid') paid++;
-                
-                // Criar botão
-                const btn = document.createElement('button');
-                btn.className = `number-btn ${numberData.status}-btn`;
-                btn.textContent = formatNumber(i);
-                btn.dataset.number = i;
-                btn.dataset.status = numberData.status;
-                
-                // Configurar comportamento do clique
-                btn.onclick = () => handleNumberClick(i, numberData.status, numberData.user);
-                
-                // Verificar se o número está selecionado
-                if (selectedNumbers.includes(i)) {
-                    btn.classList.add('selected-btn');
-                }
-                
-                numbersContainer.appendChild(btn);
+            for (let i = 0; i < TOTAL_NUMBERS; i++) {
+                const data = numbersData[i] || { status: 'available' };
+                const div = document.createElement('div');
+                div.style.cssText = `
+                    padding: 6px 2px;
+                    text-align: center;
+                    font-size: 0.7rem;
+                    border-radius: 4px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    background: ${data.status === 'available' ? '#4CAF50' : data.status === 'reserved' ? '#FF9800' : '#333'};
+                    color: white;
+                    border: 1px solid ${data.status === 'available' ? '#388E3C' : data.status === 'reserved' ? '#F57C00' : '#111'};
+                `;
+                div.textContent = formatNumber(i);
+                div.title = `Nº ${formatNumber(i)} - ${getStatusText(data.status)}`;
+                div.onclick = () => {
+                    handleNumberClick(i, data.status, data.user, data.transactionId);
+                    elements.allNumbersModal.style.display = 'none';
+                };
+                grid.appendChild(div);
             }
             
-            // Atualizar contadores
-            availableCount.textContent = available;
-            reservedCount.textContent = reserved;
-            paidCount.textContent = paid;
-            buyBtn.disabled = selectedNumbers.length === 0;
+            elements.allNumbersModal.style.display = 'block';
         }
-        
-        // Manipular clique em um número
-        function handleNumberClick(number, status, user) {
-            if (isAdmin) {
-                // Comportamento para administrador
-                currentAdminNumber = number;
-                adminNumber.textContent = formatNumber(number);
-                adminStatus.textContent = getStatusText(status);
-                
-                if (status === 'reserved' || status === 'paid') {
-                    adminUserInfo.style.display = 'block';
-                    adminName.textContent = user?.name || 'N/A';
-                    adminPhone.textContent = user?.phone || 'N/A';
-                } else {
-                    adminUserInfo.style.display = 'none';
-                }
-                
-                markPaidBtn.style.display = status === 'reserved' ? 'inline-block' : 'none';
-                removeReservationBtn.style.display = (status === 'reserved' || status === 'paid') ? 'inline-block' : 'none';
-                removeReservationBtn.textContent = status === 'paid' ? 'Cancelar Compra' : 'Remover Reserva';
-                
-                markPaidBtn.onclick = () => markNumberAsPaid(number);
-                removeReservationBtn.onclick = () => removeReservation(number);
-                
-                adminModal.style.display = 'block';
+
+        function handleNumberClick(number, status, user, txId) {
+            if (!isAdmin) return;
+            
+            currentAdminNumber = number;
+            elements.adminNumber.textContent = formatNumber(number);
+            elements.adminStatus.textContent = getStatusText(status);
+            
+            if (status === 'reserved' || status === 'paid') {
+                elements.adminUserInfo.style.display = 'block';
+                elements.adminName.textContent = user?.name || 'N/A';
+                elements.adminPhone.textContent = user?.phone || 'N/A';
+                elements.adminTransactionId.textContent = txId || 'N/A';
             } else {
-                // Comportamento para usuário normal
-                if (status !== 'available') {
-                    const statusMsg = status === 'reserved' 
-                        ? `Número ${formatNumber(number)} já reservado por: ${user?.name || 'N/A'}` 
-                        : `Número ${formatNumber(number)} já foi pago e não está disponível.`;
-                    
-                    alert(statusMsg);
+                elements.adminUserInfo.style.display = 'none';
+            }
+            
+            elements.markPaidBtn.style.display = status === 'reserved' ? 'inline-block' : 'none';
+            elements.removeReservationBtn.style.display = (status === 'reserved' || status === 'paid') ? 'inline-block' : 'none';
+            elements.removeReservationBtn.textContent = status === 'paid' ? 'Cancelar Compra' : 'Remover Reserva';
+            elements.markPaidBtn.onclick = () => markNumberPaid(number);
+            elements.removeReservationBtn.onclick = () => removeReservation(number);
+            elements.adminModal.style.display = 'block';
+        }
+
+        function openBuyModal() {
+            if (isProcessing) return;
+            
+            database.ref('raffleNumbers').once('value').then(snap => {
+                const data = snap.val();
+                if (!data) {
+                    showToast('📦 Nenhum número disponível. Inicialize a rifa primeiro.', 'error');
                     return;
                 }
                 
-                const btn = document.querySelector(`.number-btn[data-number="${number}"]`);
-                
-                if (selectedNumbers.includes(number)) {
-                    selectedNumbers = selectedNumbers.filter(n => n !== number);
-                    btn.classList.remove('selected-btn');
-                } else {
-                    selectedNumbers.push(number);
-                    btn.classList.add('selected-btn');
+                let available = 0;
+                for (let i = 0; i < TOTAL_NUMBERS; i++) {
+                    if (data[i] && data[i].status === 'available') available++;
+                }
+                if (available === 0) {
+                    showToast('⚠️ Todos os números já foram vendidos!', 'error');
+                    return;
                 }
                 
-                buyBtn.disabled = selectedNumbers.length === 0;
-            }
+                const maxQ = Math.min(10, available);
+                elements.quantitySelect.innerHTML = '';
+                for (let q = 1; q <= maxQ; q++) {
+                    const opt = document.createElement('option');
+                    opt.value = q;
+                    opt.textContent = q;
+                    elements.quantitySelect.appendChild(opt);
+                }
+                updateTotal();
+                elements.buyModal.style.display = 'block';
+                elements.nameInput.value = '';
+                elements.phoneInput.value = '';
+                setTimeout(() => elements.nameInput.focus(), 100);
+            });
         }
-        
-        // Abrir modal de compra
-        function openBuyModal() {
-            selectedNumbersList.textContent = selectedNumbers.map(n => formatNumber(n)).join(', ');
-            totalValue.textContent = selectedNumbers.length * 5;
-            buyModal.style.display = 'block';
-            nameInput.value = '';
-            phoneInput.value = '';
+
+        function updateTotal() {
+            const qty = parseInt(elements.quantitySelect.value) || 1;
+            elements.totalValue.textContent = qty * 10;
         }
-        
-        // Confirmar compra com transações
+
         function confirmPurchase() {
-            const name = nameInput.value.trim();
-            const phone = phoneInput.value.trim();
+            if (isProcessing) return;
             
+            const name = elements.nameInput.value.trim();
+            const phone = elements.phoneInput.value.trim();
+            const qty = parseInt(elements.quantitySelect.value) || 1;
+
             if (!name || !phone) {
-                alert('Por favor, preencha todos os campos.');
+                showToast('⚠️ Preencha todos os campos.', 'error');
                 return;
             }
-
             const phoneDigits = phone.replace(/\D/g, '');
             if (phoneDigits.length < 11) {
-                alert('Por favor, insira um telefone válido com DDD.');
+                showToast('⚠️ Telefone inválido. Use DDD e número.', 'error');
                 return;
             }
 
+            isProcessing = true;
+            elements.buySpinner.style.display = 'block';
+            elements.confirmBuyBtn.disabled = true;
+            elements.buyBtn.disabled = true;
+
+            const transactionId = generateTransactionId();
             const userData = { name, phone };
-            const formattedNumbers = selectedNumbers.map(n => formatNumber(n)).join(', ');
-            const total = selectedNumbers.length * 5;
 
-            // Mostrar spinner e desabilitar botão
-            buySpinner.style.display = 'block';
-            confirmBuyBtn.disabled = true;
-            
-            // Array para armazenar promessas de transação
-            const transactionPromises = [];
-            
-            // Marcar botões selecionados como "processando"
-            selectedNumbers.forEach(number => {
-                const btn = document.querySelector(`.number-btn[data-number="${number}"]`);
-                if (btn) {
-                    btn.classList.add('processing-btn');
-                    btn.disabled = true;
-                }
-            });
-
-            selectedNumbers.forEach(number => {
-                const numberRef = database.ref(`raffleNumbers/${number}`);
-                
-                // Criar uma promessa de transação para cada número
-                transactionPromises.push(
-                    numberRef.transaction(currentData => {
-                        if (currentData && currentData.status === 'available') {
-                            return {
-                                status: 'reserved',
-                                user: userData
-                            };
+            // Buscar números disponíveis
+            database.ref('raffleNumbers').once('value')
+                .then(snapshot => {
+                    const data = snapshot.val();
+                    if (!data) throw new Error('Nenhum número disponível');
+                    
+                    // Listar números disponíveis
+                    const availableNumbers = [];
+                    for (let i = 0; i < TOTAL_NUMBERS; i++) {
+                        if (data[i] && data[i].status === 'available') {
+                            availableNumbers.push(i);
                         }
-                        // Retorna undefined para abortar a transação se o número não estiver disponível
-                        return;
-                    })
-                );
-            });
-
-            // Executa todas as transações
-            Promise.all(transactionPromises)
-                .then(results => {
-                    // Verifica se alguma transação falhou
-                    const failedNumbers = [];
-                    results.forEach((result, index) => {
-                        if (!result.committed) {
-                            failedNumbers.push(selectedNumbers[index]);
-                        }
-                    });
-
-                    if (failedNumbers.length > 0) {
-                        // Alguns números não puderam ser reservados
-                        const failedFormatted = failedNumbers.map(n => formatNumber(n)).join(', ');
-                        alert(`Os seguintes números já foram reservados por outra pessoa: ${failedFormatted}. Por favor, selecione outros números.`);
-                        
-                        // Remove os números que falharam da seleção
-                        selectedNumbers = selectedNumbers.filter(n => !failedNumbers.includes(n));
-                        updateSelectedNumbersUI();
-                        
-                        // Fecha o modal se todos os números falharam
-                        if (selectedNumbers.length === 0) {
-                            buyModal.style.display = 'none';
-                        }
-                    } else {
-                        // Todos os números foram reservados com sucesso
-                        const message = `Oi, reservei os números ${formattedNumbers} e gostaria de fazer o pagamento.\n\n` +
-                                       `*Nome:* ${name}\n` +
-                                       `*Telefone:* ${phone}\n` +
-                                       `*Valor Total:* R$ ${total},00`;
-                        
-                        window.open(`https://wa.me/5512997473756?text=${encodeURIComponent(message)}`, '_blank');
-                        
-                        setTimeout(() => {
-                            alert('Reserva realizada com sucesso! Atualizando a página...');
-                            window.location.reload();
-                        }, 1000);
                     }
+                    
+                    // Embaralhar para aleatoriedade
+                    for (let i = availableNumbers.length - 1; i > 0; i--) {
+                        const j = Math.floor(Math.random() * (i + 1));
+                        [availableNumbers[i], availableNumbers[j]] = [availableNumbers[j], availableNumbers[i]];
+                    }
+                    
+                    const selected = availableNumbers.slice(0, qty);
+                    if (selected.length === 0) {
+                        throw new Error('Não há números disponíveis suficientes');
+                    }
+                    
+                    // Reservar os números um por um
+                    const updatePromises = selected.map(num => {
+                        return database.ref(`raffleNumbers/${num}`).update({
+                            status: 'reserved',
+                            user: userData,
+                            transactionId: transactionId
+                        });
+                    });
+                    
+                    return Promise.all(updatePromises).then(() => {
+                        // Salvar transação
+                        return database.ref(`transactions/${transactionId}`).set({
+                            id: transactionId,
+                            numbers: selected,
+                            user: userData,
+                            total: selected.length * 10,
+                            timestamp: Date.now(),
+                            status: 'reserved'
+                        }).then(() => selected);
+                    });
+                })
+                .then(selectedNumbers => {
+                    const formatted = selectedNumbers.map(n => formatNumber(n)).join(', ');
+                    const total = selectedNumbers.length * 10;
+                    
+                    const msg = `Olá! Reservei os números: ${formatted}\n` +
+                                `ID Transação: ${transactionId}\n` +
+                                `Nome: ${name}\n` +
+                                `Telefone: ${phone}\n` +
+                                `Total: R$ ${total},00\n\n`;
+                    
+                    
+                    window.open(`https://wa.me/5512997473756?text=${encodeURIComponent(msg)}`, '_blank');
+                    showToast(`✅ Reserva realizada!\n🆔 ID: ${transactionId}\n📋 ${selectedNumbers.length} números reservados`, 'success');
+                    elements.buyModal.style.display = 'none';
+                    loadNumbers();
                 })
                 .catch(error => {
-                    console.error('Erro ao reservar números:', error);
-                    alert('Erro na reserva: ' + error.message);
+                    console.error('Erro na compra:', error);
+                    showToast('❌ Erro ao processar: ' + error.message, 'error');
                 })
                 .finally(() => {
-                    // Restaurar UI
-                    buySpinner.style.display = 'none';
-                    confirmBuyBtn.disabled = false;
-                    
-                    // Remover estado de processando dos botões
-                    selectedNumbers.forEach(number => {
-                        const btn = document.querySelector(`.number-btn[data-number="${number}"]`);
-                        if (btn) {
-                            btn.classList.remove('processing-btn');
-                            btn.disabled = false;
-                        }
-                    });
+                    isProcessing = false;
+                    elements.buySpinner.style.display = 'none';
+                    elements.confirmBuyBtn.disabled = false;
+                    elements.buyBtn.disabled = false;
                 });
         }
-        
-        // Atualizar a UI dos números selecionados
-        function updateSelectedNumbersUI() {
-            // Remove a classe selected-btn de todos os botões
-            document.querySelectorAll('.number-btn').forEach(btn => {
-                btn.classList.remove('selected-btn');
+
+        function searchTransaction() {
+            const id = elements.transactionSearchInput.value.trim().toUpperCase();
+            if (!id) { showToast('⚠️ Digite um ID de transação.', 'error'); return; }
+            
+            elements.transactionResult.style.display = 'none';
+            elements.transactionActionMessage.style.display = 'none';
+
+            database.ref(`transactions/${id}`).once('value').then(snap => {
+                if (!snap.exists()) {
+                    showToast('❌ Transação não encontrada.', 'error');
+                    return;
+                }
+                const data = snap.val();
+                currentTransactionId = id;
+                elements.resultTransactionId.textContent = data.id;
+                elements.resultClientName.textContent = data.user.name;
+                elements.resultClientPhone.textContent = data.user.phone;
+                elements.resultDate.textContent = new Date(data.timestamp).toLocaleString('pt-BR');
+                elements.resultTotalValue.textContent = data.total.toFixed(2);
+                elements.resultNumbers.innerHTML = '';
+                data.numbers.forEach(num => {
+                    const span = document.createElement('span');
+                    span.className = 'transaction-number';
+                    span.textContent = formatNumber(num);
+                    elements.resultNumbers.appendChild(span);
+                });
+                elements.transactionResult.style.display = 'block';
+                elements.transactionActionMessage.style.display = 'none';
+                const isPaid = data.status === 'paid';
+                elements.markTransactionPaid.style.display = isPaid ? 'none' : 'inline-block';
+                elements.markTransactionPaid.textContent = isPaid ? '✅ Já Pago' : '✅ Marcar Todos como Pago';
+                if (isPaid) {
+                    elements.transactionActionMessage.className = 'success-message';
+                    elements.transactionActionMessage.textContent = '✅ Esta transação já foi paga.';
+                    elements.transactionActionMessage.style.display = 'block';
+                }
+                showToast('✅ Transação encontrada!', 'success');
+            }).catch(err => {
+                console.error(err);
+                showToast('❌ Erro ao buscar transação.', 'error');
             });
-            
-            // Adiciona a classe apenas aos números ainda selecionados
-            selectedNumbers.forEach(number => {
-                const btn = document.querySelector(`.number-btn[data-number="${number}"]`);
-                if (btn) btn.classList.add('selected-btn');
-            });
-            
-            // Atualiza o botão de compra
-            buyBtn.disabled = selectedNumbers.length === 0;
-            
-            // Atualiza a lista no modal se estiver aberto
-            if (buyModal.style.display === 'block') {
-                selectedNumbersList.textContent = selectedNumbers.map(n => formatNumber(n)).join(', ');
-                totalValue.textContent = selectedNumbers.length * 5;
-            }
         }
-        
-        // Abrir modal de login
+
+        function markTransactionPaid() {
+            if (!currentTransactionId) return;
+            if (!confirm(`Marcar transação ${currentTransactionId} como paga?`)) return;
+            
+            elements.markTransactionPaid.disabled = true;
+            elements.markTransactionPaid.textContent = '⏳ ...';
+            
+            database.ref(`transactions/${currentTransactionId}`).once('value').then(snap => {
+                if (!snap.exists()) { showToast('Transação não encontrada.', 'error'); return; }
+                const data = snap.val();
+                if (data.status === 'paid') { showToast('Já paga.', 'error'); return; }
+                const updates = {};
+                data.numbers.forEach(num => { updates[`raffleNumbers/${num}/status`] = 'paid'; });
+                updates[`transactions/${currentTransactionId}/status`] = 'paid';
+                return database.ref().update(updates);
+            }).then(() => {
+                elements.transactionActionMessage.className = 'success-message';
+                elements.transactionActionMessage.textContent = '✅ Pagamento confirmado!';
+                elements.transactionActionMessage.style.display = 'block';
+                elements.markTransactionPaid.style.display = 'none';
+                showToast('✅ Pagamento confirmado com sucesso!', 'success');
+                loadNumbers();
+            }).catch(err => {
+                console.error(err);
+                showToast('❌ Erro: ' + err.message, 'error');
+            }).finally(() => {
+                elements.markTransactionPaid.disabled = false;
+                elements.markTransactionPaid.textContent = '✅ Marcar Todos como Pago';
+            });
+        }
+
+        function cancelTransaction() {
+            if (!currentTransactionId) return;
+            if (!confirm(`Cancelar transação ${currentTransactionId}?`)) return;
+            
+            elements.cancelTransaction.disabled = true;
+            elements.cancelTransaction.textContent = '⏳ ...';
+            
+            database.ref(`transactions/${currentTransactionId}`).once('value').then(snap => {
+                if (!snap.exists()) { showToast('Transação não encontrada.', 'error'); return; }
+                const data = snap.val();
+                const updates = {};
+                data.numbers.forEach(num => { updates[`raffleNumbers/${num}`] = { status: 'available' }; });
+                updates[`transactions/${currentTransactionId}`] = null;
+                return database.ref().update(updates);
+            }).then(() => {
+                elements.transactionActionMessage.className = 'success-message';
+                elements.transactionActionMessage.textContent = '✅ Transação cancelada.';
+                elements.transactionActionMessage.style.display = 'block';
+                elements.transactionResult.style.display = 'none';
+                elements.transactionSearchInput.value = '';
+                currentTransactionId = null;
+                showToast('✅ Transação cancelada com sucesso!', 'success');
+                loadNumbers();
+            }).catch(err => {
+                console.error(err);
+                showToast('❌ Erro: ' + err.message, 'error');
+            }).finally(() => {
+                elements.cancelTransaction.disabled = false;
+                elements.cancelTransaction.textContent = '❌ Cancelar Transação';
+            });
+        }
+
+        function markNumberPaid(number) {
+            if (!confirm(`Marcar ${formatNumber(number)} como pago?`)) return;
+            
+            database.ref(`raffleNumbers/${number}`).once('value').then(snap => {
+                const data = snap.val();
+                if (data.transactionId) {
+                    return database.ref(`transactions/${data.transactionId}/status`).set('paid')
+                        .then(() => database.ref(`raffleNumbers/${number}/status`).set('paid'));
+                }
+                return database.ref(`raffleNumbers/${number}/status`).set('paid');
+            }).then(() => {
+                elements.adminModal.style.display = 'none';
+                showToast(`✅ Número ${formatNumber(number)} pago.`, 'success');
+                loadNumbers();
+            }).catch(err => {
+                showToast('❌ Erro: ' + err.message, 'error');
+            });
+        }
+
+        function removeReservation(number) {
+            const action = elements.removeReservationBtn.textContent;
+            if (!confirm(`${action} do número ${formatNumber(number)}?`)) return;
+            
+            database.ref(`raffleNumbers/${number}`).once('value').then(snap => {
+                const data = snap.val();
+                if (data.transactionId) {
+                    return database.ref(`transactions/${data.transactionId}`).once('value').then(txSnap => {
+                        if (txSnap.exists()) {
+                            const txData = txSnap.val();
+                            const updated = txData.numbers.filter(n => n !== number);
+                            if (updated.length === 0) {
+                                return database.ref(`transactions/${data.transactionId}`).remove()
+                                    .then(() => database.ref(`raffleNumbers/${number}`).set({ status: 'available' }));
+                            } else {
+                                return database.ref(`transactions/${data.transactionId}/numbers`).set(updated)
+                                    .then(() => database.ref(`raffleNumbers/${number}`).set({ status: 'available' }));
+                            }
+                        }
+                        return database.ref(`raffleNumbers/${number}`).set({ status: 'available' });
+                    });
+                }
+                return database.ref(`raffleNumbers/${number}`).set({ status: 'available' });
+            }).then(() => {
+                elements.adminModal.style.display = 'none';
+                showToast(`✅ ${action} realizada.`, 'success');
+                loadNumbers();
+            }).catch(err => {
+                showToast('❌ Erro: ' + err.message, 'error');
+            });
+        }
+
         function openLoginModal() {
-            loginModal.style.display = 'block';
-            loginError.style.display = 'none';
-            emailInput.value = '';
-            passwordInput.value = '';
+            if (isAdmin) return;
+            elements.loginModal.style.display = 'block';
+            elements.loginError.style.display = 'none';
+            elements.emailInput.value = '';
+            elements.passwordInput.value = '';
+            setTimeout(() => elements.emailInput.focus(), 100);
         }
-        
-        // Login do administrador
+
         function loginAdmin() {
-            const email = emailInput.value.trim();
-            const password = passwordInput.value.trim();
-            
-            if (!email || !password) {
-                loginError.style.display = 'block';
+            const email = elements.emailInput.value.trim();
+            const pass = elements.passwordInput.value.trim();
+            if (!email || !pass) {
+                elements.loginError.textContent = '❌ Preencha todos os campos.';
+                elements.loginError.style.display = 'block';
                 return;
             }
+            elements.confirmLoginBtn.disabled = true;
+            elements.confirmLoginBtn.textContent = '⏳ ...';
             
-            auth.signInWithEmailAndPassword(email, password)
-                .then(userCredential => {
-                    if (userCredential.user.email === "bioranss@gmail.com") {
-                        loginModal.style.display = 'none';
-                        isAdmin = true;
-                        adminPanel.style.display = 'block';
-                        loginBtn.textContent = 'Admin Logado';
-                        loginBtn.disabled = true;
-                        // Recarregar números para atualizar as permissões
-                        database.ref('raffleNumbers').once('value').then(snapshot => {
-                            renderRaffleNumbers(snapshot.val());
-                        });
-                    } else {
-                        throw new Error('Acesso não autorizado');
-                    }
-                })
-                .catch(error => {
-                    console.error('Erro no login:', error);
-                    loginError.style.display = 'block';
-                });
+            auth.signInWithEmailAndPassword(email, pass).then(cred => {
+    if (cred.user.uid === "0kVyR8O6Wedq881t6EZJOu528Fw1") {
+                    elements.loginModal.style.display = 'none';
+                    isAdmin = true;
+                    elements.adminPanel.style.display = 'block';
+                    elements.loginBtn.textContent = '✅ Admin Logado';
+                    elements.loginBtn.disabled = true;
+                    elements.showAllNumbersBtn.style.display = 'inline-block';
+                    loadNumbers();
+                } else {
+                    throw new Error('Acesso não autorizado');
+                }
+            }).catch(err => {
+                console.error(err);
+                elements.loginError.textContent = '❌ Email ou senha incorretos.';
+                elements.loginError.style.display = 'block';
+            }).finally(() => {
+                elements.confirmLoginBtn.disabled = false;
+                elements.confirmLoginBtn.textContent = 'Entrar';
+            });
         }
-        
-        // Logout do administrador
+
         function logoutAdmin() {
-            auth.signOut()
-                .then(() => {
-                    isAdmin = false;
-                    adminPanel.style.display = 'none';
-                    loginBtn.textContent = 'Login Admin';
-                    loginBtn.disabled = false;
-                    // Recarregar números para atualizar as permissões
-                    database.ref('raffleNumbers').once('value').then(snapshot => {
-                        renderRaffleNumbers(snapshot.val());
-                    });
-                })
-                .catch(error => {
-                    console.error('Erro no logout:', error);
-                });
+            auth.signOut().then(() => {
+                isAdmin = false;
+                elements.adminPanel.style.display = 'none';
+                elements.loginBtn.textContent = '🔑 Login Admin';
+                elements.loginBtn.disabled = false;
+                elements.transactionResult.style.display = 'none';
+                elements.transactionSearchInput.value = '';
+                elements.showAllNumbersBtn.style.display = 'none';
+                currentTransactionId = null;
+                loadNumbers();
+            }).catch(console.error);
         }
-        
-        // Marcar número como pago
-        function markNumberAsPaid(number) {
-            if (confirm(`Deseja marcar o número ${formatNumber(number)} como pago?`)) {
-                database.ref(`raffleNumbers/${number}/status`).set('paid')
-                    .then(() => {
-                        adminModal.style.display = 'none';
-                        alert(`Número ${formatNumber(number)} marcado como pago.`);
-                    })
-                    .catch(error => {
-                        console.error('Erro ao marcar como pago:', error);
-                        alert('Ocorreu um erro ao marcar o número como pago.');
-                    });
-            }
-        }
-        
-        // Remover reserva
-        function removeReservation(number) {
-            const action = document.getElementById('remove-reservation-btn').textContent;
-            
-            if (confirm(`Deseja ${action.toLowerCase()} do número ${formatNumber(number)}?`)) {
-                database.ref(`raffleNumbers/${number}`).set({ status: 'available' })
-                    .then(() => {
-                        adminModal.style.display = 'none';
-                        alert(`${action} do número ${formatNumber(number)} realizada com sucesso.`);
-                    })
-                    .catch(error => {
-                        console.error('Erro ao remover reserva:', error);
-                        alert(`Ocorreu um erro ao ${action.toLowerCase()} o número.`);
-                    });
-            }
-        }
-        
-        // Obter texto do status
-        function getStatusText(status) {
-            const statusMap = {
-                'available': 'Disponível',
-                'reserved': 'Reservado',
-                'paid': 'Pago'
-            };
-            return statusMap[status] || status;
-        }
-        
-        // Iniciar aplicação
+
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
 </body>
