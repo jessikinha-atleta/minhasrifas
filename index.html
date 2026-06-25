@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rifa Xterra Malta 2027</title>
+    <title>Rifa 1000 Números</title>
     <link rel="icon" href="https://github.com/jessikinha-atleta/minhasrifas/raw/main/faviconjeh.png" type="image/png">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-auth.js"></script>
@@ -12,10 +12,12 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.mask/1.14.16/jquery.mask.min.js"></script>
     <style>
         :root {
-            --primary: #2196F3;
-            --success: #4CAF50;
-            --warning: #FF9800;
-            --danger: #F44336;
+            --primary: #1a237e;
+            --primary-light: #283593;
+            --primary-dark: #0d1445;
+            --success: #2e7d32;
+            --warning: #e65100;
+            --danger: #b71c1c;
             --dark: #000000;
             --gray: #9E9E9E;
             --light-gray: #f5f5f5;
@@ -79,9 +81,9 @@
         .status-box:hover {
             transform: translateY(-2px);
         }
-        .status-box.available { background: linear-gradient(135deg, #4CAF50, #45a049); }
-        .status-box.reserved { background: linear-gradient(135deg, #FF9800, #e68900); }
-        .status-box.paid { background: linear-gradient(135deg, #000000, #333333); }
+        .status-box.available { background: linear-gradient(135deg, #2e7d32, #1b5e20); }
+        .status-box.reserved { background: linear-gradient(135deg, #e65100, #bf360c); }
+        .status-box.paid { background: linear-gradient(135deg, #1a237e, #0d1445); }
         .status-box span {
             display: block;
             font-size: 2.5rem;
@@ -120,13 +122,39 @@
             opacity: 0.5;
             cursor: not-allowed;
         }
-        .btn-primary { background: linear-gradient(135deg, #2196F3, #1976D2); }
-        .btn-success { background: linear-gradient(135deg, #4CAF50, #388E3C); }
-        .btn-danger { background: linear-gradient(135deg, #F44336, #D32F2F); }
-        .btn-warning { background: linear-gradient(135deg, #FF9800, #F57C00); }
-        .btn-purple { background: linear-gradient(135deg, #9C27B0, #7B1FA2); }
-        .btn-info { background: linear-gradient(135deg, #00BCD4, #0097A7); }
+        /* Botão principal de compra - maior e mais destacado */
+        .btn-buy {
+            background: linear-gradient(135deg, #1a237e, #283593);
+            padding: 18px 40px;
+            font-size: 1.3rem;
+            min-width: 200px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(26, 35, 126, 0.4);
+            order: -1;
+            width: 100%;
+            max-width: 350px;
+        }
+        .btn-buy:hover:not(:disabled) {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 6px 25px rgba(26, 35, 126, 0.5);
+        }
+        /* Padronização de cores dos botões */
+        .btn-primary { background: linear-gradient(135deg, #1a237e, #283593); }
+        .btn-success { background: linear-gradient(135deg, #2e7d32, #388E3C); }
+        .btn-danger { background: linear-gradient(135deg, #b71c1c, #c62828); }
+        .btn-warning { background: linear-gradient(135deg, #e65100, #ef6c00); }
+        .btn-purple { background: linear-gradient(135deg, #1a237e, #283593); }
+        .btn-info { background: linear-gradient(135deg, #1a237e, #283593); }
         .btn-dark { background: linear-gradient(135deg, #333, #111); }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #1a237e;
+            color: #1a237e;
+        }
+        .btn-outline:hover {
+            background: #1a237e;
+            color: white;
+        }
         .contact-info {
             background: var(--white);
             padding: 15px;
@@ -173,6 +201,32 @@
             border-radius: 20px;
             font-size: 0.8rem;
         }
+        .admin-panel .filter-section {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+        }
+        .admin-panel .filter-section h4 {
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+        .admin-panel .filter-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .admin-panel .filter-buttons .btn {
+            flex: 1;
+            min-width: 80px;
+        }
+        .admin-panel .filter-count {
+            margin-top: 10px;
+            text-align: center;
+            color: #666;
+            font-size: 0.9rem;
+        }
         .admin-panel .transaction-search {
             display: flex;
             gap: 10px;
@@ -194,7 +248,7 @@
         .admin-panel .transaction-search input:focus {
             border-color: var(--primary);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+            box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1);
         }
         .admin-panel .transaction-result {
             margin-top: 15px;
@@ -236,11 +290,11 @@
         }
         .modal-content {
             background-color: var(--white);
-            margin: 10% auto;
+            margin: 5% auto;
             padding: 25px;
             border-radius: var(--border-radius);
             width: 90%;
-            max-width: 500px;
+            max-width: 700px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.2);
             animation: slideDown 0.3s ease;
         }
@@ -293,7 +347,7 @@
         .form-group input:focus, .form-group select:focus {
             border-color: var(--primary);
             outline: none;
-            box-shadow: 0 0 0 3px rgba(33, 150, 243, 0.1);
+            box-shadow: 0 0 0 3px rgba(26, 35, 126, 0.1);
         }
         .form-group .info-text {
             background: #f8f9fa;
@@ -374,8 +428,9 @@
         }
         .toast.error { background: var(--danger); }
         .toast.success { background: var(--success); }
+        .toast.info { background: var(--primary); }
         .info-box {
-            background: #e3f2fd;
+            background: #e8eaf6;
             border: 2px dashed var(--primary);
             border-radius: var(--border-radius);
             padding: 30px;
@@ -392,21 +447,92 @@
             color: var(--dark);
             margin-bottom: 10px;
         }
+        /* Lista de participantes pagos */
+        .participants-list {
+            background: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--shadow);
+            padding: 15px;
+            margin-top: 20px;
+            overflow-x: auto;
+        }
+        .participants-list h3 {
+            margin-bottom: 10px;
+            color: var(--dark);
+        }
+        .participants-list table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        .participants-list th {
+            background: #f0f0f0;
+            text-align: left;
+            padding: 10px 8px;
+        }
+        .participants-list td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .participants-list tr:hover td {
+            background: #fafafa;
+        }
+        /* Grid de números filtrados */
+        #filter-numbers-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 6px;
+            padding: 10px;
+        }
+        #filter-numbers-grid > div {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        #filter-numbers-grid > div:hover {
+            transform: scale(1.08);
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        .filter-status-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-size: 0.6rem;
+            background: rgba(255,255,255,0.2);
+        }
+        .bulk-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
         @media (max-width: 600px) {
             .header h1 { font-size: 1.5rem; }
-            .modal-content { margin: 20% auto; padding: 20px; }
+            .modal-content { margin: 10% auto; padding: 20px; }
             .action-buttons .btn { min-width: 100px; padding: 10px 16px; font-size: 0.9rem; }
             .status-container { grid-template-columns: repeat(3, 1fr); gap: 5px; }
             .status-box { padding: 15px 10px; }
             .status-box span { font-size: 2rem; }
             .admin-panel .transaction-search { flex-direction: column; }
             .admin-panel .transaction-search input { min-width: unset; }
+            .participants-list table { font-size: 0.75rem; }
+            #filter-numbers-grid {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            }
+            .btn-buy {
+                padding: 14px 30px;
+                font-size: 1.1rem;
+                min-width: 160px;
+            }
         }
     </style>
 </head>
 <body>
 
-   <div class="prize-image">
+    <div class="prize-image">
         <img src="https://raw.githubusercontent.com/jessikinha-atleta/minhasrifas/main/premio.jpg" 
              alt="Prêmio da rifa" loading="lazy">
     </div>
@@ -443,17 +569,18 @@
     </div>
 
     <div class="info-box">
-        <p>Clique em "Comprar números" e escolha a quantidade desejada (até 10 por compra).</p>
-        <p>Os números serão obtidos aleatoriamente entre os disponíveis.</p>
-<p>Faça o pagamento via PIX para a chave 12 99747-3756 e envie o comprovante. </p>
-<p>Reservas não pagas em até 24 horas serão canceladas automaticamente.</p>
+        <p>Clique em "Comprar números" e preencha seus dados. Você será encaminhado ao WhatsApp para finalizar a compra.</p>
+        <p>O administrador irá reservar os números para você após o contato.</p>
+        <p>Faça o pagamento via PIX para a chave 12 99747-3756 e envie o comprovante.</p>
+        <p>Reservas não pagas em até 24 horas serão canceladas automaticamente.</p>
     </div>
 
     <div class="action-buttons">
-        <button id="buy-btn" class="btn btn-primary" disabled>🎯 Comprar números</button>
-        <button id="contact-btn" class="btn btn-purple">📱 Contato</button>
-        <button id="login-btn" class="btn btn-warning">🔑 Login Admin</button>
-        <button id="init-btn" class="btn btn-dark" style="display:none;">📦 Inicializar 1000 números</button>
+        <button id="buy-btn" class="btn btn-buy" disabled>🎯 Comprar números</button>
+        <button id="contact-btn" class="btn btn-primary">📱 Contato</button>
+        <button id="login-btn" class="btn btn-primary">🔑 Login Admin</button>
+        <button id="init-btn" class="btn btn-primary" style="display:none;">📦 Inicializar 1000 números</button>
+        <button id="show-participants-btn" class="btn btn-primary">👥 Ver quem já está participando</button>
     </div>
 
     <div id="contact-info" class="contact-info">
@@ -468,12 +595,48 @@
             <span>✅ Logado como admin.</span>
             <span class="badge">Admin</span>
         </div>
-        
-        <button id="show-all-numbers-btn" class="btn btn-info" style="margin-bottom:15px;">👁️ Ver todos os números</button>
-        
+
+        <!-- FILTROS -->
+        <div class="filter-section">
+            <h4>🔍 Filtrar Bilhetes</h4>
+            <div class="filter-buttons">
+                <button id="filter-all-btn" class="btn btn-primary">📊 Todos</button>
+                <button id="filter-available-btn" class="btn btn-success">📦 Disponíveis</button>
+                <button id="filter-reserved-btn" class="btn btn-warning">⏳ Reservados</button>
+                <button id="filter-paid-btn" class="btn btn-primary">💰 Pagos</button>
+            </div>
+            <div class="filter-count">
+                Total: <span id="filter-total-count">0</span> bilhetes
+            </div>
+        </div>
+
+        <button id="show-all-numbers-btn" class="btn btn-primary" style="margin-bottom:15px;">👁️ Ver todos os números</button>
+
+        <!-- Área de reserva rápida via copiar/colar -->
+        <div style="background: #f0f7ff; padding: 15px; border-radius: var(--border-radius); margin-bottom: 15px; border: 1px solid #cce5ff;">
+            <h4 style="margin-bottom:8px;">📋 Reserva Rápida</h4>
+            <p style="font-size:0.9rem; margin-bottom:8px;">Cole a mensagem do WhatsApp no campo abaixo e clique em "Extrair dados".</p>
+            <textarea id="quick-paste" rows="3" style="width:100%; padding:8px; border-radius:4px; border:1px solid #ccc; font-family:inherit;" placeholder="Cole aqui a mensagem do comprador..."></textarea>
+            <button id="extract-data-btn" class="btn btn-success" style="margin-top:8px;">📥 Extrair dados</button>
+            <div id="extracted-data" style="margin-top:10px; display:none; background:white; padding:10px; border-radius:4px; border:1px solid #ddd;">
+                <p><strong>Nome:</strong> <span id="extract-name"></span></p>
+                <p><strong>Telefone:</strong> <span id="extract-phone"></span></p>
+                <p><strong>Quantidade:</strong> <span id="extract-qty"></span></p>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px;">
+                    <button id="quick-reserve-btn" class="btn btn-success">🔒 Reservar números</button>
+                </div>
+            </div>
+            <div id="reserve-result" style="margin-top:10px; display:none; background:#e8f5e9; padding:10px; border-radius:4px; border-left: 4px solid #2e7d32;">
+                <p style="font-weight:bold; color:#2e7d32;">✅ Reserva realizada com sucesso!</p>
+                <p><strong>🆔 ID da Transação:</strong> <span id="reserve-transaction-id"></span></p>
+                <p><strong>🔢 Números:</strong> <span id="reserve-numbers-list"></span></p>
+                <p style="font-size:0.9rem; color:#666;">💡 O ID foi copiado para a área de transferência e preenchido no campo de busca.</p>
+            </div>
+        </div>
+
         <div class="transaction-search">
-            <input type="text" id="transaction-search-input" placeholder="🔍 ID da transação (ex: TXN-000001)">
-            <button id="search-transaction-btn" class="btn btn-info">Buscar</button>
+            <input type="text" id="transaction-search-input" placeholder="🔍 Cole aqui o ID da transação">
+            <button id="search-transaction-btn" class="btn btn-primary">Buscar</button>
         </div>
         <div class="transaction-result" id="transaction-result">
             <h3>📋 Detalhes</h3>
@@ -495,16 +658,16 @@
         <button id="logout-btn" class="btn btn-danger" style="margin-top:15px;">🚪 Logout</button>
     </div>
 
-    <!-- Modal de compra -->
+    <!-- Modal de compra (usuário) -->
     <div id="buy-modal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
                 <h2>🎯 Comprar números</h2>
                 <span class="close">&times;</span>
             </div>
             <div class="form-group">
-                <label for="quantity">🔢 Quantidade (máx 10):</label>
-                <select id="quantity">
+                <label for="buy-quantity">🔢 Quantidade desejada:</label>
+                <select id="buy-quantity">
                     <option value="1">1</option>
                     <option value="2">2</option>
                     <option value="3">3</option>
@@ -518,28 +681,27 @@
                 </select>
             </div>
             <div class="form-group">
-                <label for="name">👤 Nome Completo:</label>
-                <input type="text" id="name" placeholder="Digite seu nome" required>
+                <label for="buy-name">👤 Nome Completo:</label>
+                <input type="text" id="buy-name" placeholder="Digite seu nome" required>
             </div>
             <div class="form-group">
-                <label for="phone">📱 Telefone:</label>
-                <input type="tel" id="phone" placeholder="(00) 00000-0000" required>
+                <label for="buy-phone">📱 Telefone:</label>
+                <input type="tel" id="buy-phone" placeholder="(00) 00000-0000" required>
             </div>
             <div class="form-group">
                 <div class="info-text">
                     <p>💰 Valor por número: <strong>R$ 10,00</strong></p>
-                    <p>📋 Total: R$ <span id="total-value">10</span>,00</p>
-                    <p style="font-size:0.9rem; color:#666;">Os números serão sorteados automaticamente entre os disponíveis.</p>
+                    <p>📋 Total: R$ <span id="buy-total">10</span>,00</p>
+                    <p style="font-size:0.9rem; color:#666;">Após confirmar, você será encaminhado ao WhatsApp para finalizar a compra.</p>
                 </div>
             </div>
-            <div class="loading-spinner" id="buy-spinner"></div>
-            <button id="confirm-buy-btn" class="btn btn-success" style="width:100%;">✅ Confirmar Compra</button>
+            <button id="confirm-buy-btn" class="btn btn-success" style="width:100%;">📲 Ir para WhatsApp</button>
         </div>
     </div>
 
     <!-- Modal de login -->
     <div id="login-modal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
                 <h2>🔑 Login Admin</h2>
                 <span class="close">&times;</span>
@@ -559,7 +721,7 @@
 
     <!-- Modal de admin individual -->
     <div id="admin-modal" class="modal">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width: 500px;">
             <div class="modal-header">
                 <h2>⚙️ Administrar Número</h2>
                 <span class="close">&times;</span>
@@ -594,6 +756,50 @@
         </div>
     </div>
 
+    <!-- Modal para lista de participantes -->
+    <div id="participants-modal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h2>👥 Participantes (Pagos)</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div style="max-height: 500px; overflow-y: auto;">
+                <div id="participants-list-container" class="participants-list">
+                    <table>
+                        <thead>
+                            <tr><th>Bilhete</th><th>Comprador</th><th>Telefone</th></tr>
+                        </thead>
+                        <tbody id="participants-table-body">
+                            <tr><td colspan="3" style="text-align:center; color:#888;">Carregando...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para filtros -->
+    <div id="filter-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="filter-modal-title">📊 Bilhetes Filtrados</h2>
+                <span class="close">&times;</span>
+            </div>
+            <div style="max-height: 500px; overflow-y: auto;">
+                <div id="filter-numbers-grid"></div>
+            </div>
+            <div class="bulk-actions" id="filter-bulk-actions">
+                <button id="filter-mark-all-paid" class="btn btn-success" style="display:none;">✅ Marcar todos como Pago</button>
+                <button id="filter-cancel-all" class="btn btn-danger" style="display:none;">❌ Cancelar todos</button>
+            </div>
+            <div style="margin-top: 15px; padding: 10px; background: #f8f9fa; border-radius: 4px;">
+                <p style="text-align: center; margin: 0; font-size: 0.9rem; color: #666;">
+                    Clique em um número para administrá-lo
+                </p>
+            </div>
+        </div>
+    </div>
+
     <!-- Toast -->
     <div id="toast" class="toast"></div>
 
@@ -621,6 +827,9 @@
         const TOTAL_NUMBERS = 1000;
         let isConnected = false;
         let numbersData = null;
+        let quickExtractedData = null;
+        let currentFilter = 'all';
+        let filteredNumbers = [];
 
         const elements = {
             buyBtn: document.getElementById('buy-btn'),
@@ -633,10 +842,10 @@
             allNumbersModal: document.getElementById('all-numbers-modal'),
             allNumbersGrid: document.getElementById('all-numbers-grid'),
             confirmBuyBtn: document.getElementById('confirm-buy-btn'),
-            totalValue: document.getElementById('total-value'),
-            nameInput: document.getElementById('name'),
-            phoneInput: document.getElementById('phone'),
-            quantitySelect: document.getElementById('quantity'),
+            buyTotal: document.getElementById('buy-total'),
+            buyName: document.getElementById('buy-name'),
+            buyPhone: document.getElementById('buy-phone'),
+            buyQuantity: document.getElementById('buy-quantity'),
             loginBtn: document.getElementById('login-btn'),
             confirmLoginBtn: document.getElementById('confirm-login-btn'),
             emailInput: document.getElementById('email'),
@@ -652,7 +861,6 @@
             adminUserInfo: document.getElementById('admin-user-info'),
             markPaidBtn: document.getElementById('mark-paid-btn'),
             removeReservationBtn: document.getElementById('remove-reservation-btn'),
-            buySpinner: document.getElementById('buy-spinner'),
             contactBtn: document.getElementById('contact-btn'),
             contactInfo: document.getElementById('contact-info'),
             transactionSearchInput: document.getElementById('transaction-search-input'),
@@ -670,15 +878,30 @@
             initBtn: document.getElementById('init-btn'),
             connectionStatus: document.getElementById('connection-status'),
             toast: document.getElementById('toast'),
-            showAllNumbersBtn: document.getElementById('show-all-numbers-btn')
+            showAllNumbersBtn: document.getElementById('show-all-numbers-btn'),
+            showParticipantsBtn: document.getElementById('show-participants-btn'),
+            participantsModal: document.getElementById('participants-modal'),
+            participantsTableBody: document.getElementById('participants-table-body'),
+            quickPaste: document.getElementById('quick-paste'),
+            extractDataBtn: document.getElementById('extract-data-btn'),
+            extractedData: document.getElementById('extracted-data'),
+            extractName: document.getElementById('extract-name'),
+            extractPhone: document.getElementById('extract-phone'),
+            extractQty: document.getElementById('extract-qty'),
+            quickReserveBtn: document.getElementById('quick-reserve-btn'),
+            filterTotalCount: document.getElementById('filter-total-count'),
+            filterModal: document.getElementById('filter-modal'),
+            filterNumbersGrid: document.getElementById('filter-numbers-grid'),
+            filterModalTitle: document.getElementById('filter-modal-title'),
+            filterMarkAllPaid: document.getElementById('filter-mark-all-paid'),
+            filterCancelAll: document.getElementById('filter-cancel-all'),
+            filterAllBtn: document.getElementById('filter-all-btn'),
+            filterAvailableBtn: document.getElementById('filter-available-btn'),
+            filterReservedBtn: document.getElementById('filter-reserved-btn'),
+            filterPaidBtn: document.getElementById('filter-paid-btn')
         };
 
         const formatNumber = (num) => num.toString().padStart(3, '0');
-        const generateTransactionId = () => {
-            const ts = Date.now().toString().slice(-6);
-            const rand = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-            return `TXN-${ts}${rand}`;
-        };
         const getStatusText = (s) => ({ available: 'Disponível ✅', reserved: 'Reservado ⏳', paid: 'Pago 💰' }[s] || s);
 
         function showToast(message, type = '') {
@@ -690,8 +913,209 @@
             toast._timeout = setTimeout(() => { toast.style.display = 'none'; }, 5000);
         }
 
+        // ==================== FUNÇÕES DE FILTRO ====================
+
+        function filterNumbersByStatus(status) {
+            if (!numbersData) {
+                showToast('⚠️ Carregando dados...', 'error');
+                return;
+            }
+
+            currentFilter = status;
+            const filtered = [];
+
+            for (let i = 0; i < TOTAL_NUMBERS; i++) {
+                const data = numbersData[i] || { status: 'available' };
+                if (status === 'all') {
+                    filtered.push({ number: i, ...data });
+                } else if (data.status === status) {
+                    filtered.push({ number: i, ...data });
+                }
+            }
+
+            filteredNumbers = filtered;
+            elements.filterTotalCount.textContent = filtered.length;
+
+            // Ordena por número
+            filtered.sort((a, b) => a.number - b.number);
+
+            showFilteredNumbers(filtered, status);
+        }
+
+        function showFilteredNumbers(filtered, status) {
+            const grid = elements.filterNumbersGrid;
+            grid.innerHTML = '';
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; padding:20px; color:#888;">Nenhum bilhete encontrado com este status.</p>';
+                elements.filterModal.style.display = 'block';
+                return;
+            }
+
+            // Atualiza título
+            const statusNames = {
+                'all': '📊 Todos os Bilhetes',
+                'available': '📦 Bilhetes Disponíveis',
+                'reserved': '⏳ Bilhetes Reservados',
+                'paid': '💰 Bilhetes Pagos'
+            };
+            elements.filterModalTitle.textContent = statusNames[status] || 'Bilhetes Filtrados';
+
+            // Mostra/esconde botões de ação em massa
+            if (status === 'reserved') {
+                elements.filterMarkAllPaid.style.display = 'inline-block';
+                elements.filterCancelAll.style.display = 'inline-block';
+                elements.filterMarkAllPaid.textContent = '✅ Marcar todos como Pago';
+                elements.filterCancelAll.textContent = '❌ Cancelar todos';
+                elements.filterMarkAllPaid.onclick = () => bulkAction('paid', filtered);
+                elements.filterCancelAll.onclick = () => bulkAction('cancel', filtered);
+            } else if (status === 'paid') {
+                elements.filterMarkAllPaid.style.display = 'none';
+                elements.filterCancelAll.style.display = 'inline-block';
+                elements.filterCancelAll.textContent = '❌ Cancelar todos (voltar para disponível)';
+                elements.filterCancelAll.onclick = () => bulkAction('cancel', filtered);
+            } else {
+                elements.filterMarkAllPaid.style.display = 'none';
+                elements.filterCancelAll.style.display = 'none';
+            }
+
+            // Cria os cards dos números
+            for (const item of filtered) {
+                const div = document.createElement('div');
+                const statusColors = {
+                    'available': '#2e7d32',
+                    'reserved': '#e65100',
+                    'paid': '#1a237e'
+                };
+                const statusBg = statusColors[item.status] || '#666';
+
+                div.style.cssText = `
+                    padding: 10px 4px;
+                    text-align: center;
+                    font-size: 0.85rem;
+                    border-radius: 6px;
+                    font-weight: bold;
+                    cursor: pointer;
+                    background: ${statusBg};
+                    color: white;
+                    border: 2px solid ${statusBg};
+                    transition: all 0.2s ease;
+                `;
+                div.textContent = formatNumber(item.number);
+                div.title = `Nº ${formatNumber(item.number)} - ${getStatusText(item.status)}`;
+
+                // Adiciona informações do usuário se disponível
+                if (item.user) {
+                    const userInfo = document.createElement('div');
+                    userInfo.style.cssText = `
+                        font-size: 0.6rem;
+                        margin-top: 2px;
+                        opacity: 0.85;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        white-space: nowrap;
+                    `;
+                    userInfo.textContent = item.user.name.split(' ').slice(0, 2).join(' ');
+                    div.appendChild(userInfo);
+                }
+
+                div.onmouseover = function() {
+                    this.style.transform = 'scale(1.08)';
+                    this.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+                    this.style.zIndex = '10';
+                };
+                div.onmouseout = function() {
+                    this.style.transform = 'scale(1)';
+                    this.style.boxShadow = 'none';
+                    this.style.zIndex = 'auto';
+                };
+
+                div.onclick = () => {
+                    elements.filterModal.style.display = 'none';
+                    handleNumberClick(item.number, item.status, item.user, item.transactionId);
+                };
+
+                grid.appendChild(div);
+            }
+
+            elements.filterModal.style.display = 'block';
+        }
+
+        async function bulkAction(action, filtered) {
+            const statusNames = {
+                'paid': 'pagos',
+                'cancel': 'cancelados (voltarão para disponível)'
+            };
+
+            if (!confirm(`Deseja realmente marcar ${filtered.length} bilhetes como ${statusNames[action]}?`)) {
+                return;
+            }
+
+            const btn = action === 'paid' ? elements.filterMarkAllPaid : elements.filterCancelAll;
+            btn.disabled = true;
+            btn.textContent = '⏳ Processando...';
+
+            try {
+                const updates = {};
+                const transactionIds = new Set();
+
+                for (const item of filtered) {
+                    if (action === 'paid') {
+                        updates[`raffleNumbers/${item.number}/status`] = 'paid';
+                        if (item.transactionId) {
+                            transactionIds.add(item.transactionId);
+                        }
+                    } else if (action === 'cancel') {
+                        updates[`raffleNumbers/${item.number}`] = { status: 'available' };
+                        if (item.transactionId) {
+                            transactionIds.add(item.transactionId);
+                        }
+                    }
+                }
+
+                for (const txId of transactionIds) {
+                    if (action === 'paid') {
+                        updates[`transactions/${txId}/status`] = 'paid';
+                    } else if (action === 'cancel') {
+                        updates[`transactions/${txId}`] = null;
+                    }
+                }
+
+                await database.ref().update(updates);
+
+                showToast(`✅ ${filtered.length} bilhetes ${statusNames[action]} com sucesso!`, 'success');
+                loadNumbers();
+                elements.filterModal.style.display = 'none';
+
+            } catch (error) {
+                console.error(error);
+                showToast('❌ Erro ao processar ação em massa: ' + error.message, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = action === 'paid' ? '✅ Marcar todos como Pago' : '❌ Cancelar todos';
+            }
+        }
+
+        // ==================== FUNÇÕES PRINCIPAIS ====================
+
         function initApp() {
-            $('#phone').mask('(00) 00000-0000');
+            $('#buy-phone').mask('(00) 00000-0000');
+
+            // Event listeners dos filtros
+            elements.filterAllBtn.addEventListener('click', () => filterNumbersByStatus('all'));
+            elements.filterAvailableBtn.addEventListener('click', () => filterNumbersByStatus('available'));
+            elements.filterReservedBtn.addEventListener('click', () => filterNumbersByStatus('reserved'));
+            elements.filterPaidBtn.addEventListener('click', () => filterNumbersByStatus('paid'));
+
+            // Fechar modal de filtro
+            elements.filterModal.querySelector('.close').addEventListener('click', function() {
+                elements.filterModal.style.display = 'none';
+            });
+            window.addEventListener('click', function(e) {
+                if (e.target === elements.filterModal) {
+                    elements.filterModal.style.display = 'none';
+                }
+            });
 
             database.ref('.info/connected').on('value', snap => {
                 isConnected = snap.val() === true;
@@ -730,25 +1154,27 @@
             elements.cancelTransaction.addEventListener('click', cancelTransaction);
             elements.initBtn.addEventListener('click', initializeRaffleNumbers);
             elements.showAllNumbersBtn.addEventListener('click', showAllNumbers);
+            elements.showParticipantsBtn.addEventListener('click', showParticipants);
+            elements.extractDataBtn.addEventListener('click', extractDataFromText);
+            elements.quickReserveBtn.addEventListener('click', quickReserve);
 
-            elements.quantitySelect.addEventListener('change', updateTotal);
+            elements.buyQuantity.addEventListener('change', updateBuyTotal);
             document.querySelectorAll('.close').forEach(el => {
-                el.addEventListener('click', function() { 
+                el.addEventListener('click', function() {
                     const modal = this.closest('.modal');
                     if (modal) modal.style.display = 'none';
                 });
             });
-            window.addEventListener('click', e => { 
-                if (e.target.classList.contains('modal')) e.target.style.display = 'none'; 
+            window.addEventListener('click', e => {
+                if (e.target.classList.contains('modal')) e.target.style.display = 'none';
             });
             document.addEventListener('keydown', e => {
                 if (e.key === 'Enter') {
                     if (elements.loginModal.style.display === 'block') loginAdmin();
-                    if (elements.buyModal.style.display === 'block') confirmPurchase();
                 }
             });
-            elements.transactionSearchInput.addEventListener('keypress', e => { 
-                if (e.key === 'Enter') searchTransaction(); 
+            elements.transactionSearchInput.addEventListener('keypress', e => {
+                if (e.key === 'Enter') searchTransaction();
             });
 
             if (isConnected) loadNumbers();
@@ -760,15 +1186,15 @@
 
         function initializeRaffleNumbers() {
             if (!confirm('Deseja inicializar os 1000 números? Isso irá resetar todos os dados existentes.')) return;
-            
+
             elements.initBtn.disabled = true;
             elements.initBtn.textContent = '⏳ Processando...';
-            
+
             const numbers = {};
             for (let i = 0; i < TOTAL_NUMBERS; i++) {
                 numbers[i] = { status: 'available' };
             }
-            
+
             database.ref('raffleNumbers').set(numbers)
                 .then(() => {
                     showToast('✅ 1000 números inicializados com sucesso!', 'success');
@@ -799,6 +1225,18 @@
                     elements.initBtn.style.display = 'none';
                     numbersData = snapshot.val();
                     updateCounters(numbersData);
+
+                    // Atualiza contagem do filtro atual
+                    if (currentFilter && numbersData) {
+                        const filtered = [];
+                        for (let i = 0; i < TOTAL_NUMBERS; i++) {
+                            const data = numbersData[i] || { status: 'available' };
+                            if (currentFilter === 'all' || data.status === currentFilter) {
+                                filtered.push({ number: i, ...data });
+                            }
+                        }
+                        elements.filterTotalCount.textContent = filtered.length;
+                    }
                 })
                 .catch(err => {
                     console.error('Erro ao carregar números:', err);
@@ -807,7 +1245,9 @@
         }
 
         function updateCounters(data) {
-            let available = 0, reserved = 0, paid = 0;
+            let available = 0,
+                reserved = 0,
+                paid = 0;
             for (let i = 0; i < TOTAL_NUMBERS; i++) {
                 const status = data[i]?.status || 'available';
                 if (status === 'available') available++;
@@ -822,10 +1262,10 @@
 
         function showAllNumbers() {
             if (!isAdmin || !numbersData) return;
-            
+
             const grid = elements.allNumbersGrid;
             grid.innerHTML = '';
-            
+
             for (let i = 0; i < TOTAL_NUMBERS; i++) {
                 const data = numbersData[i] || { status: 'available' };
                 const div = document.createElement('div');
@@ -836,9 +1276,9 @@
                     border-radius: 4px;
                     font-weight: bold;
                     cursor: pointer;
-                    background: ${data.status === 'available' ? '#4CAF50' : data.status === 'reserved' ? '#FF9800' : '#333'};
+                    background: ${data.status === 'available' ? '#2e7d32' : data.status === 'reserved' ? '#e65100' : '#1a237e'};
                     color: white;
-                    border: 1px solid ${data.status === 'available' ? '#388E3C' : data.status === 'reserved' ? '#F57C00' : '#111'};
+                    border: 1px solid ${data.status === 'available' ? '#1b5e20' : data.status === 'reserved' ? '#bf360c' : '#0d1445'};
                 `;
                 div.textContent = formatNumber(i);
                 div.title = `Nº ${formatNumber(i)} - ${getStatusText(data.status)}`;
@@ -848,17 +1288,17 @@
                 };
                 grid.appendChild(div);
             }
-            
+
             elements.allNumbersModal.style.display = 'block';
         }
 
         function handleNumberClick(number, status, user, txId) {
             if (!isAdmin) return;
-            
+
             currentAdminNumber = number;
             elements.adminNumber.textContent = formatNumber(number);
             elements.adminStatus.textContent = getStatusText(status);
-            
+
             if (status === 'reserved' || status === 'paid') {
                 elements.adminUserInfo.style.display = 'block';
                 elements.adminName.textContent = user?.name || 'N/A';
@@ -867,7 +1307,7 @@
             } else {
                 elements.adminUserInfo.style.display = 'none';
             }
-            
+
             elements.markPaidBtn.style.display = status === 'reserved' ? 'inline-block' : 'none';
             elements.removeReservationBtn.style.display = (status === 'reserved' || status === 'paid') ? 'inline-block' : 'none';
             elements.removeReservationBtn.textContent = status === 'paid' ? 'Cancelar Compra' : 'Remover Reserva';
@@ -878,14 +1318,14 @@
 
         function openBuyModal() {
             if (isProcessing) return;
-            
+
             database.ref('raffleNumbers').once('value').then(snap => {
                 const data = snap.val();
                 if (!data) {
                     showToast('📦 Nenhum número disponível. Inicialize a rifa primeiro.', 'error');
                     return;
                 }
-                
+
                 let available = 0;
                 for (let i = 0; i < TOTAL_NUMBERS; i++) {
                     if (data[i] && data[i].status === 'available') available++;
@@ -894,34 +1334,34 @@
                     showToast('⚠️ Todos os números já foram vendidos!', 'error');
                     return;
                 }
-                
+
                 const maxQ = Math.min(10, available);
-                elements.quantitySelect.innerHTML = '';
+                elements.buyQuantity.innerHTML = '';
                 for (let q = 1; q <= maxQ; q++) {
                     const opt = document.createElement('option');
                     opt.value = q;
                     opt.textContent = q;
-                    elements.quantitySelect.appendChild(opt);
+                    elements.buyQuantity.appendChild(opt);
                 }
-                updateTotal();
+                updateBuyTotal();
                 elements.buyModal.style.display = 'block';
-                elements.nameInput.value = '';
-                elements.phoneInput.value = '';
-                setTimeout(() => elements.nameInput.focus(), 100);
+                elements.buyName.value = '';
+                elements.buyPhone.value = '';
+                setTimeout(() => elements.buyName.focus(), 100);
             });
         }
 
-        function updateTotal() {
-            const qty = parseInt(elements.quantitySelect.value) || 1;
-            elements.totalValue.textContent = qty * 10;
+        function updateBuyTotal() {
+            const qty = parseInt(elements.buyQuantity.value) || 1;
+            elements.buyTotal.textContent = qty * 10;
         }
 
         function confirmPurchase() {
             if (isProcessing) return;
-            
-            const name = elements.nameInput.value.trim();
-            const phone = elements.phoneInput.value.trim();
-            const qty = parseInt(elements.quantitySelect.value) || 1;
+
+            const name = elements.buyName.value.trim();
+            const phone = elements.buyPhone.value.trim();
+            const qty = parseInt(elements.buyQuantity.value) || 1;
 
             if (!name || !phone) {
                 showToast('⚠️ Preencha todos os campos.', 'error');
@@ -933,92 +1373,207 @@
                 return;
             }
 
-            isProcessing = true;
-            elements.buySpinner.style.display = 'block';
-            elements.confirmBuyBtn.disabled = true;
-            elements.buyBtn.disabled = true;
+            const msg = `Oi, quero participar da rifa! Separe ${qty} número(s) pra mim!\n${name}\n${phone}`;
 
-            const transactionId = generateTransactionId();
+            elements.buyModal.style.display = 'none';
+            window.open(`https://wa.me/5512997473756?text=${encodeURIComponent(msg)}`, '_blank');
+
+            showToast('✅ Mensagem enviada! Aguarde o contato do administrador.', 'success');
+        }
+
+        // Função para extrair dados da mensagem colada
+        function extractDataFromText() {
+            const text = elements.quickPaste.value.trim();
+            if (!text) {
+                showToast('⚠️ Cole a mensagem do WhatsApp primeiro.', 'error');
+                return;
+            }
+
+            let name = '';
+            let phone = '';
+            let qty = 1;
+
+            const phoneRegex = /(\(?\d{2}\)?\s?)?\d{5}-\d{4}/;
+            const phoneMatch = text.match(phoneRegex);
+            if (phoneMatch) {
+                phone = phoneMatch[0];
+            }
+
+            const qtyRegex = /(\d+)\s*(?:n[uú]mero|n°|nº|n)(?:s)?/i;
+            const qtyMatch = text.match(qtyRegex);
+            if (qtyMatch) {
+                qty = parseInt(qtyMatch[1]);
+                if (qty > 10) qty = 10;
+                if (qty < 1) qty = 1;
+            }
+
+            let phonePosition = -1;
+            if (phone) {
+                const phoneClean = phone.replace(/\D/g, '');
+                for (let i = 0; i < text.length; i++) {
+                    const substr = text.substring(i, i + 15).replace(/\D/g, '');
+                    if (substr.includes(phoneClean)) {
+                        phonePosition = i;
+                        break;
+                    }
+                }
+            }
+
+            if (phonePosition > -1) {
+                const beforePhone = text.substring(0, phonePosition).trim();
+                const lastExclamation = beforePhone.lastIndexOf('!');
+                if (lastExclamation > -1) {
+                    name = beforePhone.substring(lastExclamation + 1).trim();
+                } else {
+                    name = beforePhone;
+                }
+            } else {
+                const parts = text.split('!');
+                if (parts.length >= 2) {
+                    const lastPart = parts[parts.length - 1].trim();
+                    name = lastPart.replace(/^\d+\s*/, '');
+                }
+            }
+
+            if (name) {
+                name = name.replace(/^Separe\s*/i, '');
+                name = name.replace(/\s*pra mim!?\s*$/i, '');
+                name = name.replace(/\s*para mim!?\s*$/i, '');
+                name = name.replace(/^,\s*/, '');
+                name = name.replace(/,\s*$/, '');
+                name = name.trim();
+            }
+
+            if (!name || name.length < 2) {
+                if (phone) {
+                    const beforePhone = text.split(phone)[0].trim();
+                    const parts = beforePhone.split('!');
+                    if (parts.length >= 2) {
+                        name = parts[parts.length - 1].trim();
+                    } else {
+                        name = beforePhone;
+                    }
+                }
+            }
+
+            if (!name || name.length < 2) {
+                showToast('⚠️ Não foi possível extrair o nome. Verifique a mensagem.', 'error');
+                return;
+            }
+
+            if (phone) {
+                const digits = phone.replace(/\D/g, '');
+                if (digits.length === 11) {
+                    phone = `(${digits.slice(0,2)}) ${digits.slice(2,7)}-${digits.slice(7)}`;
+                } else if (digits.length === 10) {
+                    phone = `(${digits.slice(0,2)}) ${digits.slice(2,6)}-${digits.slice(6)}`;
+                }
+            }
+
+            quickExtractedData = { name, phone, qty };
+            elements.extractName.textContent = name;
+            elements.extractPhone.textContent = phone || 'Não identificado';
+            elements.extractQty.textContent = qty;
+            elements.extractedData.style.display = 'block';
+            showToast('✅ Dados extraídos com sucesso!', 'success');
+        }
+
+        // Reserva rápida para o admin
+        async function quickReserve() {
+            if (!isAdmin) {
+                showToast('⚠️ Faça login como admin primeiro.', 'error');
+                return;
+            }
+            if (!quickExtractedData) {
+                showToast('⚠️ Extraia os dados primeiro.', 'error');
+                return;
+            }
+
+            const { name, phone, qty } = quickExtractedData;
+            if (!name) {
+                showToast('⚠️ Nome não identificado.', 'error');
+                return;
+            }
+
+            const snapshot = await database.ref('raffleNumbers').once('value');
+            const data = snapshot.val();
+            if (!data) {
+                showToast('📦 Nenhum número disponível.', 'error');
+                return;
+            }
+
+            const availableNumbers = [];
+            for (let i = 0; i < TOTAL_NUMBERS; i++) {
+                if (data[i] && data[i].status === 'available') {
+                    availableNumbers.push(i);
+                }
+            }
+
+            if (availableNumbers.length < qty) {
+                showToast(`⚠️ Apenas ${availableNumbers.length} números disponíveis.`, 'error');
+                return;
+            }
+
+            for (let i = availableNumbers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [availableNumbers[i], availableNumbers[j]] = [availableNumbers[j], availableNumbers[i]];
+            }
+
+            const selected = availableNumbers.slice(0, qty);
             const userData = { name, phone };
+            const transactionId = database.ref('transactions').push().key;
 
-            // Buscar números disponíveis
-            database.ref('raffleNumbers').once('value')
-                .then(snapshot => {
-                    const data = snapshot.val();
-                    if (!data) throw new Error('Nenhum número disponível');
-                    
-                    // Listar números disponíveis
-                    const availableNumbers = [];
-                    for (let i = 0; i < TOTAL_NUMBERS; i++) {
-                        if (data[i] && data[i].status === 'available') {
-                            availableNumbers.push(i);
-                        }
-                    }
-                    
-                    // Embaralhar para aleatoriedade
-                    for (let i = availableNumbers.length - 1; i > 0; i--) {
-                        const j = Math.floor(Math.random() * (i + 1));
-                        [availableNumbers[i], availableNumbers[j]] = [availableNumbers[j], availableNumbers[i]];
-                    }
-                    
-                    const selected = availableNumbers.slice(0, qty);
-                    if (selected.length === 0) {
-                        throw new Error('Não há números disponíveis suficientes');
-                    }
-                    
-                    // Reservar os números um por um
-                    const updatePromises = selected.map(num => {
-                        return database.ref(`raffleNumbers/${num}`).update({
-                            status: 'reserved',
-                            user: userData,
-                            transactionId: transactionId
-                        });
-                    });
-                    
-                    return Promise.all(updatePromises).then(() => {
-                        // Salvar transação
-                        return database.ref(`transactions/${transactionId}`).set({
-                            id: transactionId,
-                            numbers: selected,
-                            user: userData,
-                            total: selected.length * 10,
-                            timestamp: Date.now(),
-                            status: 'reserved'
-                        }).then(() => selected);
-                    });
-                })
-                .then(selectedNumbers => {
-                    const formatted = selectedNumbers.map(n => formatNumber(n)).join(', ');
-                    const total = selectedNumbers.length * 10;
-                    
-                    const msg = `Olá! Reservei os números: ${formatted}\n` +
-                                `ID Transação: ${transactionId}\n` +
-                                `Nome: ${name}\n` +
-                                `Telefone: ${phone}\n` +
-                                `Total: R$ ${total},00\n\n`;
-                    
-                    
-                    window.open(`https://wa.me/5512997473756?text=${encodeURIComponent(msg)}`, '_blank');
-                    showToast(`✅ Reserva realizada!\n🆔 ID: ${transactionId}\n📋 ${selectedNumbers.length} números reservados`, 'success');
-                    elements.buyModal.style.display = 'none';
-                    loadNumbers();
-                })
-                .catch(error => {
-                    console.error('Erro na compra:', error);
-                    showToast('❌ Erro ao processar: ' + error.message, 'error');
-                })
-                .finally(() => {
-                    isProcessing = false;
-                    elements.buySpinner.style.display = 'none';
-                    elements.confirmBuyBtn.disabled = false;
-                    elements.buyBtn.disabled = false;
-                });
+            const updates = {};
+            selected.forEach(num => {
+                updates[`raffleNumbers/${num}`] = {
+                    status: 'reserved',
+                    user: userData,
+                    transactionId: transactionId
+                };
+            });
+            updates[`transactions/${transactionId}`] = {
+                id: transactionId,
+                numbers: selected,
+                user: userData,
+                total: selected.length * 10,
+                timestamp: Date.now(),
+                status: 'reserved'
+            };
+
+            await database.ref().update(updates);
+
+            const formatted = selected.map(n => formatNumber(n)).join(', ');
+
+            const reserveResult = document.getElementById('reserve-result');
+            const reserveTransactionId = document.getElementById('reserve-transaction-id');
+            const reserveNumbersList = document.getElementById('reserve-numbers-list');
+
+            reserveTransactionId.textContent = transactionId;
+            reserveNumbersList.textContent = formatted;
+            reserveResult.style.display = 'block';
+
+            navigator.clipboard.writeText(transactionId).then(() => {
+                console.log('ID da transação copiado para a área de transferência.');
+            }).catch(err => {
+                console.log('Não foi possível copiar o ID automaticamente.');
+            });
+
+            elements.transactionSearchInput.value = transactionId;
+
+            setTimeout(() => {
+                searchTransaction();
+            }, 1000);
+
+            showToast(`✅ ${selected.length} números reservados!\n🆔 ID: ${transactionId}`, 'success');
+
+            loadNumbers();
+            quickExtractedData = null;
         }
 
         function searchTransaction() {
-            const id = elements.transactionSearchInput.value.trim().toUpperCase();
+            const id = elements.transactionSearchInput.value.trim();
             if (!id) { showToast('⚠️ Digite um ID de transação.', 'error'); return; }
-            
+
             elements.transactionResult.style.display = 'none';
             elements.transactionActionMessage.style.display = 'none';
 
@@ -1061,10 +1616,10 @@
         function markTransactionPaid() {
             if (!currentTransactionId) return;
             if (!confirm(`Marcar transação ${currentTransactionId} como paga?`)) return;
-            
+
             elements.markTransactionPaid.disabled = true;
             elements.markTransactionPaid.textContent = '⏳ ...';
-            
+
             database.ref(`transactions/${currentTransactionId}`).once('value').then(snap => {
                 if (!snap.exists()) { showToast('Transação não encontrada.', 'error'); return; }
                 const data = snap.val();
@@ -1092,10 +1647,10 @@
         function cancelTransaction() {
             if (!currentTransactionId) return;
             if (!confirm(`Cancelar transação ${currentTransactionId}?`)) return;
-            
+
             elements.cancelTransaction.disabled = true;
             elements.cancelTransaction.textContent = '⏳ ...';
-            
+
             database.ref(`transactions/${currentTransactionId}`).once('value').then(snap => {
                 if (!snap.exists()) { showToast('Transação não encontrada.', 'error'); return; }
                 const data = snap.val();
@@ -1123,7 +1678,7 @@
 
         function markNumberPaid(number) {
             if (!confirm(`Marcar ${formatNumber(number)} como pago?`)) return;
-            
+
             database.ref(`raffleNumbers/${number}`).once('value').then(snap => {
                 const data = snap.val();
                 if (data.transactionId) {
@@ -1143,7 +1698,7 @@
         function removeReservation(number) {
             const action = elements.removeReservationBtn.textContent;
             if (!confirm(`${action} do número ${formatNumber(number)}?`)) return;
-            
+
             database.ref(`raffleNumbers/${number}`).once('value').then(snap => {
                 const data = snap.val();
                 if (data.transactionId) {
@@ -1172,6 +1727,68 @@
             });
         }
 
+        // Lista de participantes pagos
+        function showParticipants() {
+            const tbody = elements.participantsTableBody;
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#888;">Carregando...</td></tr>';
+            elements.participantsModal.style.display = 'block';
+
+            database.ref('raffleNumbers').once('value').then(snap => {
+                const data = snap.val();
+                if (!data) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Nenhum participante ainda.</td></tr>';
+                    return;
+                }
+
+                const paidNumbers = [];
+                for (let i = 0; i < TOTAL_NUMBERS; i++) {
+                    if (data[i] && data[i].status === 'paid' && data[i].user) {
+                        paidNumbers.push({
+                            number: i,
+                            name: data[i].user.name || 'Desconhecido',
+                            phone: data[i].user.phone || ''
+                        });
+                    }
+                }
+
+                if (paidNumbers.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Nenhum participante ainda.</td></tr>';
+                    return;
+                }
+
+                paidNumbers.sort((a, b) => a.number - b.number);
+
+                let html = '';
+                for (const p of paidNumbers) {
+                    let displayPhone = p.phone;
+                    if (displayPhone.length >= 8) {
+                        const digits = displayPhone.replace(/\D/g, '');
+                        if (digits.length >= 8) {
+                            const last4 = digits.slice(-4);
+                            const firstPart = digits.slice(0, digits.length - 4);
+                            const hidden = firstPart.slice(0, 2) + 'XXXXX' + last4;
+                            if (displayPhone.includes('(')) {
+                                const ddd = digits.slice(0, 2);
+                                displayPhone = `(${ddd}) ${hidden.slice(2)}`;
+                            } else {
+                                displayPhone = hidden;
+                            }
+                        }
+                    }
+                    const nameParts = p.name.split(' ');
+                    let shortName = nameParts[0];
+                    if (nameParts.length > 1) {
+                        shortName += ' ' + nameParts[nameParts.length - 1];
+                    }
+                    html += `<tr><td>${formatNumber(p.number)}</td><td>${shortName}</td><td>${displayPhone}</td></tr>`;
+                }
+                tbody.innerHTML = html;
+            }).catch(err => {
+                console.error(err);
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:red;">Erro ao carregar participantes.</td></tr>';
+            });
+        }
+
         function openLoginModal() {
             if (isAdmin) return;
             elements.loginModal.style.display = 'block';
@@ -1191,9 +1808,9 @@
             }
             elements.confirmLoginBtn.disabled = true;
             elements.confirmLoginBtn.textContent = '⏳ ...';
-            
+
             auth.signInWithEmailAndPassword(email, pass).then(cred => {
-    if (cred.user.uid === "0kVyR8O6Wedq881t6EZJOu528Fw1") {
+                if (cred.user.uid === "0kVyR8O6Wedq881t6EZJOu528Fw1") {
                     elements.loginModal.style.display = 'none';
                     isAdmin = true;
                     elements.adminPanel.style.display = 'block';
