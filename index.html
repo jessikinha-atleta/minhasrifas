@@ -153,6 +153,11 @@
             background: #1a237e;
             color: white;
         }
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            min-width: auto;
+        }
         .contact-info {
             background: var(--white);
             padding: 15px;
@@ -610,6 +615,15 @@
             border-color: var(--primary);
             outline: none;
         }
+        .winner-badge {
+            background: #FFD700;
+            color: #333;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.7rem;
+            display: inline-block;
+        }
         @media (max-width: 600px) {
             .header h1 { font-size: 1.5rem; }
             .modal-content { margin: 10% auto; padding: 20px; }
@@ -720,6 +734,28 @@
             </div>
         </div>
 
+        <!-- RESERVA RÁPIDA VIA WHATSAPP (RESTAURADA) -->
+        <div style="background: #f0f7ff; padding: 15px; border-radius: var(--border-radius); margin-bottom: 15px; border: 1px solid #cce5ff;">
+            <h4 style="margin-bottom:8px;">📋 Reserva Rápida via WhatsApp</h4>
+            <p style="font-size:0.9rem; margin-bottom:8px;">Cole a mensagem do WhatsApp no campo abaixo e clique em "Extrair dados".</p>
+            <textarea id="quick-paste" rows="3" style="width:100%; padding:8px; border-radius:4px; border:1px solid #ccc; font-family:inherit;" placeholder="Cole aqui a mensagem do comprador..."></textarea>
+            <button id="extract-data-btn" class="btn btn-success" style="margin-top:8px;">📥 Extrair dados</button>
+            <div id="extracted-data" style="margin-top:10px; display:none; background:white; padding:10px; border-radius:4px; border:1px solid #ddd;">
+                <p><strong>👤 Nome:</strong> <span id="extract-name"></span></p>
+                <p><strong>📱 Telefone:</strong> <span id="extract-phone"></span></p>
+                <p><strong>🔢 Quantidade:</strong> <span id="extract-qty"></span></p>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px;">
+                    <button id="quick-reserve-btn" class="btn btn-success">🔒 Reservar números</button>
+                </div>
+            </div>
+            <div id="reserve-result" style="margin-top:10px; display:none; background:#e8f5e9; padding:10px; border-radius:4px; border-left: 4px solid #2e7d32;">
+                <p style="font-weight:bold; color:#2e7d32;">✅ Reserva realizada com sucesso!</p>
+                <p><strong>🆔 ID da Transação:</strong> <span id="reserve-transaction-id"></span></p>
+                <p><strong>🔢 Bilhete(s):</strong> <span id="reserve-numbers-list"></span></p>
+                <p style="font-size:0.9rem; color:#666;">💡 O ID foi copiado para a área de transferência e preenchido no campo de busca.</p>
+            </div>
+        </div>
+
         <!-- BUSCAS -->
         <div class="admin-search-container">
             <div class="search-box">
@@ -740,7 +776,28 @@
             </div>
         </div>
 
-        <!-- RESERVA RÁPIDA COM SELEÇÃO DE NÚMEROS -->
+        <!-- BUSCAR DETENTOR DE NÚMERO (SORTEIO) -->
+        <div style="background: #fff8e1; padding: 15px; border-radius: var(--border-radius); margin-bottom: 15px; border: 1px solid #ffe082;">
+            <h4 style="margin-bottom:8px;">🎯 Consultar Detentor de Número (Sorteio)</h4>
+            <p style="font-size:0.9rem; margin-bottom:8px;">Digite o número sorteado para ver quem é o detentor e entrar em contato.</p>
+            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                <input type="text" id="winner-search-input" placeholder="Número (ex: 123)" style="flex:1; min-width:150px; padding:10px 12px; border:2px solid #ddd; border-radius:4px; font-size:1rem;">
+                <button id="winner-search-btn" class="btn btn-warning">🔍 Consultar</button>
+            </div>
+            <div id="winner-result" style="margin-top:10px; display:none; background:white; padding:15px; border-radius:4px; border:2px solid #FFD700;">
+                <p><strong>🎯 Número:</strong> <span id="winner-number"></span></p>
+                <p><strong>📌 Status:</strong> <span id="winner-status"></span></p>
+                <div id="winner-user-info" style="display:none; margin-top:10px; padding:10px; background:#f8f9fa; border-radius:4px;">
+                    <p><strong>👤 Nome:</strong> <span id="winner-name"></span></p>
+                    <p><strong>📱 Telefone:</strong> <span id="winner-phone"></span></p>
+                    <p><strong>🆔 Transação:</strong> <span id="winner-transaction"></span></p>
+                    <button id="winner-contact-btn" class="btn btn-success btn-sm" style="margin-top:8px;">📱 Entrar em contato</button>
+                </div>
+                <p id="winner-not-found" style="color:#888; display:none;">❌ Número não encontrado ou disponível.</p>
+            </div>
+        </div>
+
+        <!-- RESERVA RÁPIDA COM SELEÇÃO -->
         <div style="background: #f0f7ff; padding: 15px; border-radius: var(--border-radius); margin-bottom: 15px; border: 1px solid #cce5ff;">
             <h4 style="margin-bottom:8px;">🎯 Reserva Rápida com Seleção</h4>
             <p style="font-size:0.9rem; margin-bottom:8px;">Clique nos números disponíveis para selecionar, depois preencha os dados do comprador.</p>
@@ -797,13 +854,13 @@
                 <p><strong>👤 Comprador:</strong> 
                     <span class="edit-inline">
                         <span id="result-client-name-display"></span>
-                        <button id="edit-client-name-btn" class="btn btn-outline" style="padding:4px 8px; font-size:0.8rem; min-width:auto;">✏️</button>
+                        <button id="edit-client-name-btn" class="btn btn-outline btn-sm">✏️</button>
                     </span>
                 </p>
                 <p><strong>📱 Telefone:</strong>
                     <span class="edit-inline">
                         <span id="result-client-phone-display"></span>
-                        <button id="edit-client-phone-btn" class="btn btn-outline" style="padding:4px 8px; font-size:0.8rem; min-width:auto;">✏️</button>
+                        <button id="edit-client-phone-btn" class="btn btn-outline btn-sm">✏️</button>
                     </span>
                 </p>
                 <p><strong>📅 Data:</strong> <span id="result-date"></span></p>
@@ -894,6 +951,7 @@
                 <p><strong>👤 Nome:</strong> <span id="admin-name"></span></p>
                 <p><strong>📱 Telefone:</strong> <span id="admin-phone"></span></p>
                 <p><strong>🆔 Transação:</strong> <span id="admin-transaction-id"></span></p>
+                <button id="admin-contact-btn" class="btn btn-success btn-sm" style="margin-top:8px;">📱 Entrar em contato</button>
             </div>
             <div style="display:flex; gap:10px; margin-top:20px; flex-wrap:wrap;">
                 <button id="mark-paid-btn" class="btn btn-success" style="display:none; flex:1;">✅ Marcar como Pago</button>
@@ -1014,7 +1072,7 @@
         let currentFilter = 'all';
         let filteredNumbers = [];
         let selectedQuickNumbers = new Set();
-        let quickReserveData = null;
+        let quickExtractedData = null;
 
         const elements = {
             buyBtn: document.getElementById('buy-btn'),
@@ -1108,7 +1166,29 @@
             statRevenue: document.getElementById('stat-revenue'),
             statOverdue: document.getElementById('stat-overdue'),
             overdueList: document.getElementById('overdue-list'),
-            sorteioDate: document.getElementById('sorteio-date')
+            sorteioDate: document.getElementById('sorteio-date'),
+            quickPaste: document.getElementById('quick-paste'),
+            extractDataBtn: document.getElementById('extract-data-btn'),
+            extractedData: document.getElementById('extracted-data'),
+            extractName: document.getElementById('extract-name'),
+            extractPhone: document.getElementById('extract-phone'),
+            extractQty: document.getElementById('extract-qty'),
+            quickReserveBtn: document.getElementById('quick-reserve-btn'),
+            reserveResult: document.getElementById('reserve-result'),
+            reserveTransactionId: document.getElementById('reserve-transaction-id'),
+            reserveNumbersList: document.getElementById('reserve-numbers-list'),
+            winnerSearchInput: document.getElementById('winner-search-input'),
+            winnerSearchBtn: document.getElementById('winner-search-btn'),
+            winnerResult: document.getElementById('winner-result'),
+            winnerNumber: document.getElementById('winner-number'),
+            winnerStatus: document.getElementById('winner-status'),
+            winnerUserInfo: document.getElementById('winner-user-info'),
+            winnerName: document.getElementById('winner-name'),
+            winnerPhone: document.getElementById('winner-phone'),
+            winnerTransaction: document.getElementById('winner-transaction'),
+            winnerContactBtn: document.getElementById('winner-contact-btn'),
+            winnerNotFound: document.getElementById('winner-not-found'),
+            adminContactBtn: document.getElementById('admin-contact-btn')
         };
 
         const formatNumber = (num) => num.toString().padStart(3, '0');
@@ -1138,7 +1218,6 @@
                 if (status === 'available') available++;
                 else if (status === 'reserved') {
                     reserved++;
-                    // Verifica inadimplência
                     if (item.timestamp && (now - item.timestamp) > dayInMs) {
                         overdue.push({ number: i, name: item.user?.name || 'Desconhecido', phone: item.user?.phone || '' });
                     }
@@ -1148,20 +1227,17 @@
                 }
             }
 
-            // Atualiza contadores principais
             elements.availableCount.textContent = available;
             elements.reservedCount.textContent = reserved;
             elements.paidCount.textContent = paid;
             elements.buyBtn.disabled = isProcessing || available === 0;
 
-            // Estatísticas
             elements.statTotal.textContent = TOTAL_NUMBERS;
             elements.statAvailable.textContent = available;
             elements.statReserved.textContent = reserved;
             elements.statPaid.textContent = paid;
             elements.statRevenue.textContent = `R$ ${revenue.toFixed(2)}`;
 
-            // Inadimplentes
             elements.statOverdue.textContent = overdue.length;
             if (overdue.length > 0) {
                 let html = '';
@@ -1178,6 +1254,244 @@
             } else {
                 elements.overdueList.innerHTML = '<div style="color:#888; font-size:0.9rem;">Nenhuma reserva em atraso.</div>';
             }
+        }
+
+        // ==================== BUSCA POR DETENTOR (SORTEIO) ====================
+
+        function searchWinner() {
+            const input = elements.winnerSearchInput.value.trim();
+            if (!input) { showToast('⚠️ Digite um número.', 'error'); return; }
+
+            const number = parseInt(input);
+            if (isNaN(number) || number < 0 || number > 999) {
+                showToast('⚠️ Número inválido. Digite um número entre 000 e 999.', 'error');
+                return;
+            }
+
+            if (!numbersData) { showToast('⚠️ Carregando dados...', 'error'); return; }
+
+            const data = numbersData[number];
+            const resultDiv = elements.winnerResult;
+            const userInfo = elements.winnerUserInfo;
+            const notFound = elements.winnerNotFound;
+
+            elements.winnerNumber.textContent = formatNumber(number);
+
+            if (!data || data.status === 'available') {
+                elements.winnerStatus.textContent = 'Disponível ✅';
+                userInfo.style.display = 'none';
+                notFound.style.display = 'block';
+                resultDiv.style.display = 'block';
+                return;
+            }
+
+            notFound.style.display = 'none';
+            elements.winnerStatus.textContent = getStatusText(data.status);
+
+            if (data.user) {
+                userInfo.style.display = 'block';
+                elements.winnerName.textContent = data.user.name || 'N/A';
+                elements.winnerPhone.textContent = data.user.phone || 'N/A';
+                elements.winnerTransaction.textContent = data.transactionId || 'N/A';
+                elements.winnerContactBtn.onclick = () => {
+                    const phone = data.user.phone.replace(/\D/g, '');
+                    if (phone.length >= 10) {
+                        window.open(`https://wa.me/55${phone}?text=Olá! Vi que você está com o número ${formatNumber(number)} da rifa.`, '_blank');
+                    } else {
+                        showToast('⚠️ Telefone não disponível.', 'error');
+                    }
+                };
+            } else {
+                userInfo.style.display = 'none';
+            }
+
+            resultDiv.style.display = 'block';
+        }
+
+        // ==================== RESERVA RÁPIDA VIA WHATSAPP ====================
+
+        function extractDataFromText() {
+            const text = elements.quickPaste.value.trim();
+            if (!text) {
+                showToast('⚠️ Cole a mensagem do WhatsApp primeiro.', 'error');
+                return;
+            }
+
+            let name = '';
+            let phone = '';
+            let qty = 1;
+
+            const phoneRegex = /(\(?\d{2}\)?\s?)?\d{5}-\d{4}/;
+            const phoneMatch = text.match(phoneRegex);
+            if (phoneMatch) {
+                phone = phoneMatch[0];
+            }
+
+            const qtyRegex = /(\d+)\s*(?:n[uú]mero|n°|nº|n)(?:s)?/i;
+            const qtyMatch = text.match(qtyRegex);
+            if (qtyMatch) {
+                qty = parseInt(qtyMatch[1]);
+                if (qty > 10) qty = 10;
+                if (qty < 1) qty = 1;
+            }
+
+            let phonePosition = -1;
+            if (phone) {
+                const phoneClean = phone.replace(/\D/g, '');
+                for (let i = 0; i < text.length; i++) {
+                    const substr = text.substring(i, i + 15).replace(/\D/g, '');
+                    if (substr.includes(phoneClean)) {
+                        phonePosition = i;
+                        break;
+                    }
+                }
+            }
+
+            if (phonePosition > -1) {
+                const beforePhone = text.substring(0, phonePosition).trim();
+                const lastExclamation = beforePhone.lastIndexOf('!');
+                if (lastExclamation > -1) {
+                    name = beforePhone.substring(lastExclamation + 1).trim();
+                } else {
+                    name = beforePhone;
+                }
+            } else {
+                const parts = text.split('!');
+                if (parts.length >= 2) {
+                    const lastPart = parts[parts.length - 1].trim();
+                    name = lastPart.replace(/^\d+\s*/, '');
+                }
+            }
+
+            if (name) {
+                name = name.replace(/^Separe\s*/i, '');
+                name = name.replace(/\s*pra mim!?\s*$/i, '');
+                name = name.replace(/\s*para mim!?\s*$/i, '');
+                name = name.replace(/^,\s*/, '');
+                name = name.replace(/,\s*$/, '');
+                name = name.trim();
+            }
+
+            if (!name || name.length < 2) {
+                if (phone) {
+                    const beforePhone = text.split(phone)[0].trim();
+                    const parts = beforePhone.split('!');
+                    if (parts.length >= 2) {
+                        name = parts[parts.length - 1].trim();
+                    } else {
+                        name = beforePhone;
+                    }
+                }
+            }
+
+            if (!name || name.length < 2) {
+                showToast('⚠️ Não foi possível extrair o nome. Verifique a mensagem.', 'error');
+                return;
+            }
+
+            if (phone) {
+                const digits = phone.replace(/\D/g, '');
+                if (digits.length === 11) {
+                    phone = `(${digits.slice(0,2)}) ${digits.slice(2,7)}-${digits.slice(7)}`;
+                } else if (digits.length === 10) {
+                    phone = `(${digits.slice(0,2)}) ${digits.slice(2,6)}-${digits.slice(6)}`;
+                }
+            }
+
+            quickExtractedData = { name, phone, qty };
+            elements.extractName.textContent = name;
+            elements.extractPhone.textContent = phone || 'Não identificado';
+            elements.extractQty.textContent = qty;
+            elements.extractedData.style.display = 'block';
+            showToast('✅ Dados extraídos com sucesso!', 'success');
+        }
+
+        async function quickReserveWhatsApp() {
+            if (!isAdmin) {
+                showToast('⚠️ Faça login como admin primeiro.', 'error');
+                return;
+            }
+            if (!quickExtractedData) {
+                showToast('⚠️ Extraia os dados primeiro.', 'error');
+                return;
+            }
+
+            const { name, phone, qty } = quickExtractedData;
+            if (!name) {
+                showToast('⚠️ Nome não identificado.', 'error');
+                return;
+            }
+
+            const snapshot = await database.ref('raffleNumbers').once('value');
+            const data = snapshot.val();
+            if (!data) {
+                showToast('📦 Nenhum número disponível.', 'error');
+                return;
+            }
+
+            const availableNumbers = [];
+            for (let i = 0; i < TOTAL_NUMBERS; i++) {
+                if (data[i] && data[i].status === 'available') {
+                    availableNumbers.push(i);
+                }
+            }
+
+            if (availableNumbers.length < qty) {
+                showToast(`⚠️ Apenas ${availableNumbers.length} números disponíveis.`, 'error');
+                return;
+            }
+
+            for (let i = availableNumbers.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [availableNumbers[i], availableNumbers[j]] = [availableNumbers[j], availableNumbers[i]];
+            }
+
+            const selected = availableNumbers.slice(0, qty);
+            const userData = { name, phone };
+            const transactionId = database.ref('transactions').push().key;
+
+            const updates = {};
+            selected.forEach(num => {
+                updates[`raffleNumbers/${num}`] = {
+                    status: 'reserved',
+                    user: userData,
+                    transactionId: transactionId,
+                    timestamp: Date.now()
+                };
+            });
+            updates[`transactions/${transactionId}`] = {
+                id: transactionId,
+                numbers: selected,
+                user: userData,
+                total: selected.length * 10,
+                timestamp: Date.now(),
+                status: 'reserved'
+            };
+
+            await database.ref().update(updates);
+
+            const formatted = selected.map(n => formatNumber(n)).join(', ');
+
+            elements.reserveTransactionId.textContent = transactionId;
+            elements.reserveNumbersList.textContent = formatted;
+            elements.reserveResult.style.display = 'block';
+
+            navigator.clipboard.writeText(transactionId).then(() => {
+                console.log('ID da transação copiado para a área de transferência.');
+            }).catch(err => {
+                console.log('Não foi possível copiar o ID automaticamente.');
+            });
+
+            elements.transactionSearchInput.value = transactionId;
+
+            setTimeout(() => {
+                searchTransaction();
+            }, 1000);
+
+            showToast(`✅ ${selected.length} números reservados!\n🆔 ID: ${transactionId}`, 'success');
+
+            loadNumbers();
+            quickExtractedData = null;
         }
 
         // ==================== BUSCAS ====================
@@ -1546,7 +1860,6 @@
                 showToast(`✅ ${selected.length} números reservados! ID: ${transactionId}`, 'success');
                 loadNumbers();
 
-                // Copiar ID para o campo de busca
                 elements.transactionSearchInput.value = transactionId;
                 setTimeout(() => searchTransaction(), 500);
 
@@ -1600,7 +1913,6 @@
             elements.saveClientEdit.textContent = '⏳ ...';
 
             try {
-                // Buscar transação atual
                 const txSnap = await database.ref(`transactions/${currentTransactionId}`).once('value');
                 if (!txSnap.exists()) {
                     throw new Error('Transação não encontrada.');
@@ -1610,10 +1922,8 @@
                 const updates = {};
                 const updatedUser = { name: newName, phone: newPhone };
 
-                // Atualizar na transação
                 updates[`transactions/${currentTransactionId}/user`] = updatedUser;
 
-                // Atualizar em cada número
                 txData.numbers.forEach(num => {
                     updates[`raffleNumbers/${num}/user`] = updatedUser;
                 });
@@ -1623,7 +1933,6 @@
                 elements.editClientModal.style.display = 'none';
                 showToast('✅ Dados atualizados com sucesso!', 'success');
 
-                // Recarregar transação
                 setTimeout(() => searchTransaction(), 300);
 
             } catch (error) {
@@ -1644,7 +1953,7 @@
             $('#quick-reserve-phone').mask('(00) 00000-0000');
             $('#edit-client-phone').mask('(00) 00000-0000');
 
-            // Event listeners dos filtros
+            // Filtros
             elements.filterAllBtn.addEventListener('click', () => filterNumbersByStatus('all'));
             elements.filterAvailableBtn.addEventListener('click', () => filterNumbersByStatus('available'));
             elements.filterReservedBtn.addEventListener('click', () => filterNumbersByStatus('reserved'));
@@ -1656,7 +1965,15 @@
             elements.searchNameBtn.addEventListener('click', searchByName);
             elements.nameSearchInput.addEventListener('keypress', e => { if (e.key === 'Enter') searchByName(); });
 
-            // Reserva rápida
+            // Busca de detentor (sorteio)
+            elements.winnerSearchBtn.addEventListener('click', searchWinner);
+            elements.winnerSearchInput.addEventListener('keypress', e => { if (e.key === 'Enter') searchWinner(); });
+
+            // Reserva rápida WhatsApp
+            elements.extractDataBtn.addEventListener('click', extractDataFromText);
+            elements.quickReserveBtn.addEventListener('click', quickReserveWhatsApp);
+
+            // Reserva rápida com seleção
             elements.quickClearSelection.addEventListener('click', () => {
                 selectedQuickNumbers.clear();
                 renderQuickNumberGrid();
@@ -1672,21 +1989,17 @@
                 elements.editClientModal.style.display = 'none';
             });
 
-            // Fechar modal de edição
+            // Fechar modais
             elements.editClientModal.querySelector('.close').addEventListener('click', function() {
                 elements.editClientModal.style.display = 'none';
+            });
+            elements.filterModal.querySelector('.close').addEventListener('click', function() {
+                elements.filterModal.style.display = 'none';
             });
             window.addEventListener('click', function(e) {
                 if (e.target === elements.editClientModal) {
                     elements.editClientModal.style.display = 'none';
                 }
-            });
-
-            // Fechar modal de filtro
-            elements.filterModal.querySelector('.close').addEventListener('click', function() {
-                elements.filterModal.style.display = 'none';
-            });
-            window.addEventListener('click', function(e) {
                 if (e.target === elements.filterModal) {
                     elements.filterModal.style.display = 'none';
                 }
@@ -1694,6 +2007,21 @@
 
             // Copy transaction details
             elements.copyTransactionDetailsBtn.addEventListener('click', copyTransactionDetails);
+
+            // Contato no admin modal
+            elements.adminContactBtn.addEventListener('click', function() {
+                const phone = elements.adminPhone.textContent;
+                if (phone && phone !== 'N/A') {
+                    const digits = phone.replace(/\D/g, '');
+                    if (digits.length >= 10) {
+                        window.open(`https://wa.me/55${digits}?text=Olá! Vi que você está com o número ${elements.adminNumber.textContent} da rifa.`, '_blank');
+                    } else {
+                        showToast('⚠️ Telefone não disponível.', 'error');
+                    }
+                } else {
+                    showToast('⚠️ Telefone não disponível.', 'error');
+                }
+            });
 
             database.ref('.info/connected').on('value', snap => {
                 isConnected = snap.val() === true;
@@ -1879,6 +2207,7 @@
                 elements.adminName.textContent = user?.name || 'N/A';
                 elements.adminPhone.textContent = user?.phone || 'N/A';
                 elements.adminTransactionId.textContent = txId || 'N/A';
+                elements.adminContactBtn.style.display = (user?.phone && user.phone !== 'N/A') ? 'inline-block' : 'none';
             } else {
                 elements.adminUserInfo.style.display = 'none';
             }
