@@ -725,14 +725,20 @@
                     <div class="stat-row"><span class="label">Faturamento Total:</span><span class="value success" id="stat-revenue">R$ 0,00</span></div>
                 </div>
             </div>
-            <div class="stat-card" id="inadimplentes-card">
-                <h4>⚠️ Inadimplentes (reservas > 24h)</h4>
-                <div id="inadimplentes-content">
-                    <div class="stat-row"><span class="label">Total em atraso:</span><span class="value danger" id="stat-overdue">0</span></div>
-                    <div id="overdue-list" style="margin-top:8px; font-size:0.9rem;"></div>
-                </div>
-            </div>
+<div class="stat-card" id="inadimplentes-card">
+    <h4>⚠️ Inadimplentes (reservas > 24h)</h4>
+    <div id="inadimplentes-content">
+        <div class="stat-row">
+            <span class="label">Total em atraso:</span>
+            <span class="value danger" id="stat-overdue">0</span>
         </div>
+        <div id="overdue-list" style="margin-top:8px; font-size:0.9rem;"></div>
+        <!-- NOVO BOTÃO PARA CONTATAR TODOS OS INADIMPLENTES -->
+        <button id="contact-all-overdue-btn" class="btn btn-warning" style="margin-top:10px; width:100%;">
+            📱 Contatar todos os inadimplentes
+        </button>
+    </div>
+</div>
 
         <!-- RESERVA RÁPIDA VIA WHATSAPP (RESTAURADA) -->
         <div style="background: #f0f7ff; padding: 15px; border-radius: var(--border-radius); margin-bottom: 15px; border: 1px solid #cce5ff;">
@@ -1205,56 +1211,73 @@
 
         // ==================== ESTATÍSTICAS E RELATÓRIOS ====================
 
-        function updateStats(data) {
-            let available = 0, reserved = 0, paid = 0, revenue = 0;
-            const overdue = [];
-            const now = Date.now();
-            const dayInMs = 24 * 60 * 60 * 1000;
+function updateStats(data) {
+    let available = 0, reserved = 0, paid = 0, revenue = 0;
+    const overdue = [];
+    const now = Date.now();
+    const dayInMs = 24 * 60 * 60 * 1000;
 
-            for (let i = 0; i < TOTAL_NUMBERS; i++) {
-                const item = data[i];
-                if (!item) { available++; continue; }
-                const status = item.status || 'available';
-                if (status === 'available') available++;
-                else if (status === 'reserved') {
-                    reserved++;
-                    if (item.timestamp && (now - item.timestamp) > dayInMs) {
-                        overdue.push({ number: i, name: item.user?.name || 'Desconhecido', phone: item.user?.phone || '' });
-                    }
-                } else if (status === 'paid') {
-                    paid++;
-                    revenue += 10;
-                }
+    for (let i = 0; i < TOTAL_NUMBERS; i++) {
+        const item = data[i];
+        if (!item) { available++; continue; }
+        const status = item.status || 'available';
+        if (status === 'available') available++;
+        else if (status === 'reserved') {
+            reserved++;
+            if (item.timestamp && (now - item.timestamp) > dayInMs) {
+                overdue.push({ number: i, name: item.user?.name || 'Desconhecido', phone: item.user?.phone || '' });
             }
-
-            elements.availableCount.textContent = available;
-            elements.reservedCount.textContent = reserved;
-            elements.paidCount.textContent = paid;
-            elements.buyBtn.disabled = isProcessing || available === 0;
-
-            elements.statTotal.textContent = TOTAL_NUMBERS;
-            elements.statAvailable.textContent = available;
-            elements.statReserved.textContent = reserved;
-            elements.statPaid.textContent = paid;
-            elements.statRevenue.textContent = `R$ ${revenue.toFixed(2)}`;
-
-            elements.statOverdue.textContent = overdue.length;
-            if (overdue.length > 0) {
-                let html = '';
-                overdue.slice(0, 10).forEach(item => {
-                    html += `<div class="stat-row" style="font-size:0.85rem;">
-                        <span>#${formatNumber(item.number)} - ${item.name}</span>
-                        <span>${item.phone}</span>
-                    </div>`;
-                });
-                if (overdue.length > 10) {
-                    html += `<div class="stat-row" style="font-size:0.85rem; color:#888;">... e mais ${overdue.length - 10}</div>`;
-                }
-                elements.overdueList.innerHTML = html;
-            } else {
-                elements.overdueList.innerHTML = '<div style="color:#888; font-size:0.9rem;">Nenhuma reserva em atraso.</div>';
-            }
+        } else if (status === 'paid') {
+            paid++;
+            revenue += 10;
         }
+    }
+
+    elements.availableCount.textContent = available;
+    elements.reservedCount.textContent = reserved;
+    elements.paidCount.textContent = paid;
+    elements.buyBtn.disabled = isProcessing || available === 0;
+
+    elements.statTotal.textContent = TOTAL_NUMBERS;
+    elements.statAvailable.textContent = available;
+    elements.statReserved.textContent = reserved;
+    elements.statPaid.textContent = paid;
+    elements.statRevenue.textContent = `R$ ${revenue.toFixed(2)}`;
+
+    elements.statOverdue.textContent = overdue.length;
+    
+    if (overdue.length > 0) {
+        let html = '';
+        overdue.slice(0, 10).forEach(item => {
+            const phoneClean = item.phone.replace(/\D/g, '');
+            const numbersStr = formatNumber(item.number);
+const message = encodeURIComponent(
+    `Oi, sua reserva está perto de expirar. ` +
+    `Assim que possível me envie o comprovante do pagamento para não perder ` +
+    `os números selecionados anteriormente. Obrigada!!`
+);
+            const whatsappUrl = phoneClean.length >= 10 
+                ? `https://wa.me/55${phoneClean}?text=${message}`
+                : '#';
+            
+            html += `<div class="stat-row" style="font-size:0.85rem; display:flex; justify-content:space-between; align-items:center; gap:5px; padding:4px 0;">
+                <span style="flex:1;">#${formatNumber(item.number)} - ${item.name}</span>
+                <span style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:0.75rem; color:#666;">${item.phone}</span>
+                    ${phoneClean.length >= 10 ? 
+                        `<a href="${whatsappUrl}" target="_blank" class="btn btn-sm btn-success" style="padding:2px 10px; font-size:0.7rem; text-decoration:none; color:white; background:#25D366; border-radius:4px; border:none; cursor:pointer; display:inline-block;">📱</a>` : 
+                        `<span style="font-size:0.6rem; color:#999;">(sem telefone)</span>`}
+                </span>
+            </div>`;
+        });
+        if (overdue.length > 10) {
+            html += `<div class="stat-row" style="font-size:0.85rem; color:#888;">... e mais ${overdue.length - 10}</div>`;
+        }
+        elements.overdueList.innerHTML = html;
+    } else {
+        elements.overdueList.innerHTML = '<div style="color:#888; font-size:0.9rem;">Nenhuma reserva em atraso.</div>';
+    }
+}
 
         // ==================== BUSCA POR DETENTOR (SORTEIO) ====================
 
@@ -2597,6 +2620,105 @@
                 loadNumbers();
             }).catch(console.error);
         }
+
+// Função para contatar todos os inadimplentes
+async function contactAllOverdue() {
+    if (!isAdmin) {
+        showToast('⚠️ Faça login como admin primeiro.', 'error');
+        return;
+    }
+    
+    if (!numbersData) {
+        showToast('⚠️ Carregando dados...', 'error');
+        return;
+    }
+
+    const now = Date.now();
+    const dayInMs = 24 * 60 * 60 * 1000;
+    const overdue = [];
+
+    for (let i = 0; i < TOTAL_NUMBERS; i++) {
+        const item = numbersData[i];
+        if (item && item.status === 'reserved' && item.timestamp && (now - item.timestamp) > dayInMs) {
+            if (item.user?.phone) {
+                overdue.push({
+                    number: i,
+                    name: item.user.name || 'Desconhecido',
+                    phone: item.user.phone
+                });
+            }
+        }
+    }
+
+    if (overdue.length === 0) {
+        showToast('✅ Nenhum inadimplente encontrado!', 'success');
+        return;
+    }
+
+    // Mostra lista de confirmacao
+    let confirmMsg = `📋 Inadimplentes (${overdue.length}):\n\n`;
+    overdue.forEach((item, index) => {
+        confirmMsg += `${index + 1}. #${formatNumber(item.number)} - ${item.name} (${item.phone})\n`;
+    });
+    confirmMsg += `\nDeseja abrir o WhatsApp para contatar todos?`;
+
+    if (!confirm(confirmMsg)) return;
+
+    // Abre cada contato em uma nova aba (com delay para não sobrecarregar)
+    let opened = 0;
+    for (const item of overdue) {
+        const phoneClean = item.phone.replace(/\D/g, '');
+        if (phoneClean.length >= 10) {
+            const numbersStr = formatNumber(item.number);
+const message = encodeURIComponent(
+    `Oi, sua reserva está perto de expirar. ` +
+    `Assim que possível me envie o comprovante do pagamento para não perder ` +
+    `os números selecionados anteriormente. Obrigada!!`
+);
+            const url = `https://wa.me/55${phoneClean}?text=${message}`;
+            
+            // Abre em nova aba com delay de 1 segundo entre cada
+            setTimeout(() => {
+                window.open(url, '_blank');
+            }, opened * 1000);
+            opened++;
+        }
+    }
+    
+    showToast(`📱 Abrindo ${opened} conversas no WhatsApp...`, 'info');
+}
+
+// Event listener para o botão
+document.addEventListener('DOMContentLoaded', function() {
+    const contactAllBtn = document.getElementById('contact-all-overdue-btn');
+    if (contactAllBtn) {
+        contactAllBtn.addEventListener('click', contactAllOverdue);
+    }
+});
+
+// Função para contatar um inadimplente específico
+function contactOverdue(number, name, phone) {
+    if (!isAdmin) {
+        showToast('⚠️ Faça login como admin primeiro.', 'error');
+        return;
+    }
+    
+    const phoneClean = phone.replace(/\D/g, '');
+    if (phoneClean.length < 10) {
+        showToast('⚠️ Telefone inválido.', 'error');
+        return;
+    }
+    
+    const numbersStr = formatNumber(number);
+    const message = encodeURIComponent(
+        `Oi, sua reserva do número ${numbersStr} está perto de expirar. ` +
+        `Assim que possível me envie o comprovante do pagamento para não perder ` +
+        `os números selecionados anteriormente. Obrigada!!`
+    );
+    
+    window.open(`https://wa.me/55${phoneClean}?text=${message}`, '_blank');
+    showToast(`📱 Abrindo WhatsApp para ${name}...`, 'info');
+}
 
         document.addEventListener('DOMContentLoaded', initApp);
     </script>
