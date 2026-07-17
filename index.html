@@ -1049,427 +1049,823 @@
     <!-- Toast -->
     <div id="toast" class="toast"></div>
 
-    <script>
-        // Firebase config
-        const firebaseConfig = {
-            apiKey: "AIzaSyDLcPmipCR0tVCaDYQHecty2dnp-hmJW3k",
-            authDomain: "rifa-ca894.firebaseapp.com",
-            databaseURL: "https://rifa-ca894-default-rtdb.firebaseio.com",
-            projectId: "rifa-ca894",
-            storageBucket: "rifa-ca894.firebasestorage.app",
-            messagingSenderId: "908858195161",
-            appId: "1:908858195161:web:2b845760747823caa712c8"
-        };
+<script>
+    // Firebase config
+    const firebaseConfig = {
+        apiKey: "AIzaSyDLcPmipCR0tVCaDYQHecty2dnp-hmJW3k",
+        authDomain: "rifa-ca894.firebaseapp.com",
+        databaseURL: "https://rifa-ca894-default-rtdb.firebaseio.com",
+        projectId: "rifa-ca894",
+        storageBucket: "rifa-ca894.firebasestorage.app",
+        messagingSenderId: "908858195161",
+        appId: "1:908858195161:web:2b845760747823caa712c8"
+    };
 
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const auth = firebase.auth();
+    firebase.initializeApp(firebaseConfig);
+    const database = firebase.database();
+    const auth = firebase.auth();
 
-        // Globals
-        let isAdmin = false;
-        let currentAdminNumber = null;
-        let isProcessing = false;
-        let currentTransactionId = null;
-        let editingTransactionId = null;
-        let editingField = null;
-        const TOTAL_NUMBERS = 1000;
-        let isConnected = false;
-        let numbersData = null;
-        let currentFilter = 'all';
-        let filteredNumbers = [];
-        let selectedQuickNumbers = new Set();
-        let quickExtractedData = null;
+    // Globals
+    let isAdmin = false;
+    let currentAdminNumber = null;
+    let isProcessing = false;
+    let currentTransactionId = null;
+    let editingTransactionId = null;
+    let editingField = null;
+    const TOTAL_NUMBERS = 1000;
+    let isConnected = false;
+    let numbersData = null;
+    let currentFilter = 'all';
+    let filteredNumbers = [];
+    let selectedQuickNumbers = new Set();
+    let quickExtractedData = null;
 
-        const elements = {
-            buyBtn: document.getElementById('buy-btn'),
-            availableCount: document.getElementById('available-count'),
-            reservedCount: document.getElementById('reserved-count'),
-            paidCount: document.getElementById('paid-count'),
-            buyModal: document.getElementById('buy-modal'),
-            loginModal: document.getElementById('login-modal'),
-            adminModal: document.getElementById('admin-modal'),
-            allNumbersModal: document.getElementById('all-numbers-modal'),
-            allNumbersGrid: document.getElementById('all-numbers-grid'),
-            confirmBuyBtn: document.getElementById('confirm-buy-btn'),
-            buyTotal: document.getElementById('buy-total'),
-            buyName: document.getElementById('buy-name'),
-            buyPhone: document.getElementById('buy-phone'),
-            buyQuantity: document.getElementById('buy-quantity'),
-            loginBtn: document.getElementById('login-btn'),
-            confirmLoginBtn: document.getElementById('confirm-login-btn'),
-            emailInput: document.getElementById('email'),
-            passwordInput: document.getElementById('password'),
-            loginError: document.getElementById('login-error'),
-            adminPanel: document.getElementById('admin-panel'),
-            logoutBtn: document.getElementById('logout-btn'),
-            adminNumber: document.getElementById('admin-number'),
-            adminStatus: document.getElementById('admin-status'),
-            adminName: document.getElementById('admin-name'),
-            adminPhone: document.getElementById('admin-phone'),
-            adminTransactionId: document.getElementById('admin-transaction-id'),
-            adminUserInfo: document.getElementById('admin-user-info'),
-            markPaidBtn: document.getElementById('mark-paid-btn'),
-            removeReservationBtn: document.getElementById('remove-reservation-btn'),
-            contactBtn: document.getElementById('contact-btn'),
-            contactInfo: document.getElementById('contact-info'),
-            transactionSearchInput: document.getElementById('transaction-search-input'),
-            searchTransactionBtn: document.getElementById('search-transaction-btn'),
-            transactionResult: document.getElementById('transaction-result'),
-            resultTransactionId: document.getElementById('result-transaction-id'),
-            resultClientNameDisplay: document.getElementById('result-client-name-display'),
-            resultClientPhoneDisplay: document.getElementById('result-client-phone-display'),
-            resultDate: document.getElementById('result-date'),
-            resultTotalValue: document.getElementById('result-total-value'),
-            resultNumbers: document.getElementById('result-numbers'),
-            markTransactionPaid: document.getElementById('mark-transaction-paid'),
-            cancelTransaction: document.getElementById('cancel-transaction'),
-            transactionActionMessage: document.getElementById('transaction-action-message'),
-            initBtn: document.getElementById('init-btn'),
-            connectionStatus: document.getElementById('connection-status'),
-            toast: document.getElementById('toast'),
-            showAllNumbersBtn: document.getElementById('show-all-numbers-btn'),
-            showParticipantsBtn: document.getElementById('show-participants-btn'),
-            participantsModal: document.getElementById('participants-modal'),
-            participantsTableBody: document.getElementById('participants-table-body'),
-            filterTotalCount: document.getElementById('filter-total-count'),
-            filterModal: document.getElementById('filter-modal'),
-            filterNumbersGrid: document.getElementById('filter-numbers-grid'),
-            filterModalTitle: document.getElementById('filter-modal-title'),
-            filterMarkAllPaid: document.getElementById('filter-mark-all-paid'),
-            filterCancelAll: document.getElementById('filter-cancel-all'),
-            filterAllBtn: document.getElementById('filter-all-btn'),
-            filterAvailableBtn: document.getElementById('filter-available-btn'),
-            filterReservedBtn: document.getElementById('filter-reserved-btn'),
-            filterPaidBtn: document.getElementById('filter-paid-btn'),
-            phoneSearchInput: document.getElementById('phone-search-input'),
-            searchPhoneBtn: document.getElementById('search-phone-btn'),
-            phoneSearchResult: document.getElementById('phone-search-result'),
-            nameSearchInput: document.getElementById('name-search-input'),
-            searchNameBtn: document.getElementById('search-name-btn'),
-            nameSearchResult: document.getElementById('name-search-result'),
-            quickNumberGrid: document.getElementById('quick-number-grid'),
-            quickSelectedCount: document.getElementById('quick-selected-count'),
-            quickClearSelection: document.getElementById('quick-clear-selection'),
-            quickReserveSelected: document.getElementById('quick-reserve-selected'),
-            quickReserveName: document.getElementById('quick-reserve-name'),
-            quickReservePhone: document.getElementById('quick-reserve-phone'),
-            quickReserveResult: document.getElementById('quick-reserve-result'),
-            quickReserveTxid: document.getElementById('quick-reserve-txid'),
-            quickReserveNumbers: document.getElementById('quick-reserve-numbers'),
-            editClientModal: document.getElementById('edit-client-modal'),
-            editClientName: document.getElementById('edit-client-name'),
-            editClientPhone: document.getElementById('edit-client-phone'),
-            saveClientEdit: document.getElementById('save-client-edit'),
-            cancelClientEdit: document.getElementById('cancel-client-edit'),
-            editClientMessage: document.getElementById('edit-client-message'),
-            editClientNameBtn: document.getElementById('edit-client-name-btn'),
-            editClientPhoneBtn: document.getElementById('edit-client-phone-btn'),
-            copyTransactionDetailsBtn: document.getElementById('copy-transaction-details-btn'),
-            statTotal: document.getElementById('stat-total'),
-            statAvailable: document.getElementById('stat-available'),
-            statReserved: document.getElementById('stat-reserved'),
-            statPaid: document.getElementById('stat-paid'),
-            statRevenue: document.getElementById('stat-revenue'),
-            statOverdue: document.getElementById('stat-overdue'),
-            overdueList: document.getElementById('overdue-list'),
-            sorteioDate: document.getElementById('sorteio-date'),
-            quickPaste: document.getElementById('quick-paste'),
-            extractDataBtn: document.getElementById('extract-data-btn'),
-            extractedData: document.getElementById('extracted-data'),
-            extractName: document.getElementById('extract-name'),
-            extractPhone: document.getElementById('extract-phone'),
-            extractQty: document.getElementById('extract-qty'),
-            quickReserveBtn: document.getElementById('quick-reserve-btn'),
-            reserveResult: document.getElementById('reserve-result'),
-            reserveTransactionId: document.getElementById('reserve-transaction-id'),
-            reserveNumbersList: document.getElementById('reserve-numbers-list'),
-            winnerSearchInput: document.getElementById('winner-search-input'),
-            winnerSearchBtn: document.getElementById('winner-search-btn'),
-            winnerResult: document.getElementById('winner-result'),
-            winnerNumber: document.getElementById('winner-number'),
-            winnerStatus: document.getElementById('winner-status'),
-            winnerUserInfo: document.getElementById('winner-user-info'),
-            winnerName: document.getElementById('winner-name'),
-            winnerPhone: document.getElementById('winner-phone'),
-            winnerTransaction: document.getElementById('winner-transaction'),
-            winnerContactBtn: document.getElementById('winner-contact-btn'),
-            winnerNotFound: document.getElementById('winner-not-found'),
-            adminContactBtn: document.getElementById('admin-contact-btn')
-        };
-
-        const formatNumber = (num) => num.toString().padStart(3, '0');
-        const getStatusText = (s) => ({ available: 'Disponível ✅', reserved: 'Reservado ⏳', paid: 'Pago 💰' }[s] || s);
-
-        function showToast(message, type = '') {
-            const toast = elements.toast;
-            toast.textContent = message;
-            toast.className = 'toast ' + type;
-            toast.style.display = 'block';
-            clearTimeout(toast._timeout);
-            toast._timeout = setTimeout(() => { toast.style.display = 'none'; }, 5000);
-        }
-
-        // ==================== ESTATÍSTICAS E RELATÓRIOS ====================
-
-function updateStats(data) {
-    let available = 0, reserved = 0, paid = 0, revenue = 0;
-    const overdue = [];
-    const now = Date.now();
-    const dayInMs = 24 * 60 * 60 * 1000;
-
-    for (let i = 0; i < TOTAL_NUMBERS; i++) {
-        const item = data[i];
-        if (!item) { available++; continue; }
-        const status = item.status || 'available';
-        if (status === 'available') available++;
-        else if (status === 'reserved') {
-            reserved++;
-            if (item.timestamp && (now - item.timestamp) > dayInMs) {
-                overdue.push({ number: i, name: item.user?.name || 'Desconhecido', phone: item.user?.phone || '' });
-            }
-        } else if (status === 'paid') {
-            paid++;
-            revenue += 10;
-        }
-    }
-
-    elements.availableCount.textContent = available;
-    elements.reservedCount.textContent = reserved;
-    elements.paidCount.textContent = paid;
-    elements.buyBtn.disabled = isProcessing || available === 0;
-
-    elements.statTotal.textContent = TOTAL_NUMBERS;
-    elements.statAvailable.textContent = available;
-    elements.statReserved.textContent = reserved;
-    elements.statPaid.textContent = paid;
-    elements.statRevenue.textContent = `R$ ${revenue.toFixed(2)}`;
-
-    elements.statOverdue.textContent = overdue.length;
-    
-    if (overdue.length > 0) {
-        let html = '';
-        overdue.slice(0, 10).forEach(item => {
-            const phoneClean = item.phone.replace(/\D/g, '');
-            const numbersStr = formatNumber(item.number);
-const message = encodeURIComponent(
-    `Oi, sua reserva está perto de expirar. ` +
-    `Assim que possível me envie o comprovante do pagamento para não perder ` +
-    `os números selecionados anteriormente. Obrigada!!`
-);
-            const whatsappUrl = phoneClean.length >= 10 
-                ? `https://wa.me/55${phoneClean}?text=${message}`
-                : '#';
+    // ==================== MÁSCARA DE TELEFONE (Sem jQuery) ====================
+    function applyPhoneMask(input) {
+        if (!input) return;
+        input.addEventListener('input', function(e) {
+            let value = this.value.replace(/\D/g, '');
+            if (value.length > 11) value = value.slice(0, 11);
             
-            html += `<div class="stat-row" style="font-size:0.85rem; display:flex; justify-content:space-between; align-items:center; gap:5px; padding:4px 0;">
-                <span style="flex:1;">#${formatNumber(item.number)} - ${item.name}</span>
-                <span style="display:flex; align-items:center; gap:8px;">
-                    <span style="font-size:0.75rem; color:#666;">${item.phone}</span>
-                    ${phoneClean.length >= 10 ? 
-                        `<a href="${whatsappUrl}" target="_blank" class="btn btn-sm btn-success" style="padding:2px 10px; font-size:0.7rem; text-decoration:none; color:white; background:#25D366; border-radius:4px; border:none; cursor:pointer; display:inline-block;">📱</a>` : 
-                        `<span style="font-size:0.6rem; color:#999;">(sem telefone)</span>`}
-                </span>
-            </div>`;
-        });
-        if (overdue.length > 10) {
-            html += `<div class="stat-row" style="font-size:0.85rem; color:#888;">... e mais ${overdue.length - 10}</div>`;
-        }
-        elements.overdueList.innerHTML = html;
-    } else {
-        elements.overdueList.innerHTML = '<div style="color:#888; font-size:0.9rem;">Nenhuma reserva em atraso.</div>';
-    }
-}
-
-        // ==================== BUSCA POR DETENTOR (SORTEIO) ====================
-
-        function searchWinner() {
-            const input = elements.winnerSearchInput.value.trim();
-            if (!input) { showToast('⚠️ Digite um número.', 'error'); return; }
-
-            const number = parseInt(input);
-            if (isNaN(number) || number < 0 || number > 999) {
-                showToast('⚠️ Número inválido. Digite um número entre 000 e 999.', 'error');
-                return;
-            }
-
-            if (!numbersData) { showToast('⚠️ Carregando dados...', 'error'); return; }
-
-            const data = numbersData[number];
-            const resultDiv = elements.winnerResult;
-            const userInfo = elements.winnerUserInfo;
-            const notFound = elements.winnerNotFound;
-
-            elements.winnerNumber.textContent = formatNumber(number);
-
-            if (!data || data.status === 'available') {
-                elements.winnerStatus.textContent = 'Disponível ✅';
-                userInfo.style.display = 'none';
-                notFound.style.display = 'block';
-                resultDiv.style.display = 'block';
-                return;
-            }
-
-            notFound.style.display = 'none';
-            elements.winnerStatus.textContent = getStatusText(data.status);
-
-            if (data.user) {
-                userInfo.style.display = 'block';
-                elements.winnerName.textContent = data.user.name || 'N/A';
-                elements.winnerPhone.textContent = data.user.phone || 'N/A';
-                elements.winnerTransaction.textContent = data.transactionId || 'N/A';
-                elements.winnerContactBtn.onclick = () => {
-                    const phone = data.user.phone.replace(/\D/g, '');
-                    if (phone.length >= 10) {
-                        window.open(`https://wa.me/55${phone}?text=Olá! Vi que você está com o número ${formatNumber(number)} da rifa.`, '_blank');
-                    } else {
-                        showToast('⚠️ Telefone não disponível.', 'error');
-                    }
-                };
+            if (value.length <= 2) {
+                this.value = value;
+            } else if (value.length <= 6) {
+                this.value = `(${value.slice(0, 2)}) ${value.slice(2)}`;
             } else {
-                userInfo.style.display = 'none';
+                this.value = `(${value.slice(0, 2)}) ${value.slice(2, 7)}-${value.slice(7, 11)}`;
             }
+        });
+    }
 
-            resultDiv.style.display = 'block';
+    // ==================== ELEMENTOS ====================
+    const elements = {
+        buyBtn: document.getElementById('buy-btn'),
+        availableCount: document.getElementById('available-count'),
+        reservedCount: document.getElementById('reserved-count'),
+        paidCount: document.getElementById('paid-count'),
+        buyModal: document.getElementById('buy-modal'),
+        loginModal: document.getElementById('login-modal'),
+        adminModal: document.getElementById('admin-modal'),
+        allNumbersModal: document.getElementById('all-numbers-modal'),
+        allNumbersGrid: document.getElementById('all-numbers-grid'),
+        confirmBuyBtn: document.getElementById('confirm-buy-btn'),
+        buyTotal: document.getElementById('buy-total'),
+        buyName: document.getElementById('buy-name'),
+        buyPhone: document.getElementById('buy-phone'),
+        buyQuantity: document.getElementById('buy-quantity'),
+        loginBtn: document.getElementById('login-btn'),
+        confirmLoginBtn: document.getElementById('confirm-login-btn'),
+        emailInput: document.getElementById('email'),
+        passwordInput: document.getElementById('password'),
+        loginError: document.getElementById('login-error'),
+        adminPanel: document.getElementById('admin-panel'),
+        logoutBtn: document.getElementById('logout-btn'),
+        adminNumber: document.getElementById('admin-number'),
+        adminStatus: document.getElementById('admin-status'),
+        adminName: document.getElementById('admin-name'),
+        adminPhone: document.getElementById('admin-phone'),
+        adminTransactionId: document.getElementById('admin-transaction-id'),
+        adminUserInfo: document.getElementById('admin-user-info'),
+        markPaidBtn: document.getElementById('mark-paid-btn'),
+        removeReservationBtn: document.getElementById('remove-reservation-btn'),
+        contactBtn: document.getElementById('contact-btn'),
+        contactInfo: document.getElementById('contact-info'),
+        transactionSearchInput: document.getElementById('transaction-search-input'),
+        searchTransactionBtn: document.getElementById('search-transaction-btn'),
+        transactionResult: document.getElementById('transaction-result'),
+        resultTransactionId: document.getElementById('result-transaction-id'),
+        resultClientNameDisplay: document.getElementById('result-client-name-display'),
+        resultClientPhoneDisplay: document.getElementById('result-client-phone-display'),
+        resultDate: document.getElementById('result-date'),
+        resultTotalValue: document.getElementById('result-total-value'),
+        resultNumbers: document.getElementById('result-numbers'),
+        markTransactionPaid: document.getElementById('mark-transaction-paid'),
+        cancelTransaction: document.getElementById('cancel-transaction'),
+        transactionActionMessage: document.getElementById('transaction-action-message'),
+        initBtn: document.getElementById('init-btn'),
+        connectionStatus: document.getElementById('connection-status'),
+        toast: document.getElementById('toast'),
+        showAllNumbersBtn: document.getElementById('show-all-numbers-btn'),
+        showParticipantsBtn: document.getElementById('show-participants-btn'),
+        participantsModal: document.getElementById('participants-modal'),
+        participantsTableBody: document.getElementById('participants-table-body'),
+        filterTotalCount: document.getElementById('filter-total-count'),
+        filterModal: document.getElementById('filter-modal'),
+        filterNumbersGrid: document.getElementById('filter-numbers-grid'),
+        filterModalTitle: document.getElementById('filter-modal-title'),
+        filterMarkAllPaid: document.getElementById('filter-mark-all-paid'),
+        filterCancelAll: document.getElementById('filter-cancel-all'),
+        filterAllBtn: document.getElementById('filter-all-btn'),
+        filterAvailableBtn: document.getElementById('filter-available-btn'),
+        filterReservedBtn: document.getElementById('filter-reserved-btn'),
+        filterPaidBtn: document.getElementById('filter-paid-btn'),
+        phoneSearchInput: document.getElementById('phone-search-input'),
+        searchPhoneBtn: document.getElementById('search-phone-btn'),
+        phoneSearchResult: document.getElementById('phone-search-result'),
+        nameSearchInput: document.getElementById('name-search-input'),
+        searchNameBtn: document.getElementById('search-name-btn'),
+        nameSearchResult: document.getElementById('name-search-result'),
+        quickNumberGrid: document.getElementById('quick-number-grid'),
+        quickSelectedCount: document.getElementById('quick-selected-count'),
+        quickClearSelection: document.getElementById('quick-clear-selection'),
+        quickReserveSelected: document.getElementById('quick-reserve-selected'),
+        quickReserveName: document.getElementById('quick-reserve-name'),
+        quickReservePhone: document.getElementById('quick-reserve-phone'),
+        quickReserveResult: document.getElementById('quick-reserve-result'),
+        quickReserveTxid: document.getElementById('quick-reserve-txid'),
+        quickReserveNumbers: document.getElementById('quick-reserve-numbers'),
+        editClientModal: document.getElementById('edit-client-modal'),
+        editClientName: document.getElementById('edit-client-name'),
+        editClientPhone: document.getElementById('edit-client-phone'),
+        saveClientEdit: document.getElementById('save-client-edit'),
+        cancelClientEdit: document.getElementById('cancel-client-edit'),
+        editClientMessage: document.getElementById('edit-client-message'),
+        editClientNameBtn: document.getElementById('edit-client-name-btn'),
+        editClientPhoneBtn: document.getElementById('edit-client-phone-btn'),
+        copyTransactionDetailsBtn: document.getElementById('copy-transaction-details-btn'),
+        statTotal: document.getElementById('stat-total'),
+        statAvailable: document.getElementById('stat-available'),
+        statReserved: document.getElementById('stat-reserved'),
+        statPaid: document.getElementById('stat-paid'),
+        statRevenue: document.getElementById('stat-revenue'),
+        statOverdue: document.getElementById('stat-overdue'),
+        overdueList: document.getElementById('overdue-list'),
+        sorteioDate: document.getElementById('sorteio-date'),
+        quickPaste: document.getElementById('quick-paste'),
+        extractDataBtn: document.getElementById('extract-data-btn'),
+        extractedData: document.getElementById('extracted-data'),
+        extractName: document.getElementById('extract-name'),
+        extractPhone: document.getElementById('extract-phone'),
+        extractQty: document.getElementById('extract-qty'),
+        quickReserveBtn: document.getElementById('quick-reserve-btn'),
+        reserveResult: document.getElementById('reserve-result'),
+        reserveTransactionId: document.getElementById('reserve-transaction-id'),
+        reserveNumbersList: document.getElementById('reserve-numbers-list'),
+        winnerSearchInput: document.getElementById('winner-search-input'),
+        winnerSearchBtn: document.getElementById('winner-search-btn'),
+        winnerResult: document.getElementById('winner-result'),
+        winnerNumber: document.getElementById('winner-number'),
+        winnerStatus: document.getElementById('winner-status'),
+        winnerUserInfo: document.getElementById('winner-user-info'),
+        winnerName: document.getElementById('winner-name'),
+        winnerPhone: document.getElementById('winner-phone'),
+        winnerTransaction: document.getElementById('winner-transaction'),
+        winnerContactBtn: document.getElementById('winner-contact-btn'),
+        winnerNotFound: document.getElementById('winner-not-found'),
+        adminContactBtn: document.getElementById('admin-contact-btn')
+    };
+
+    const formatNumber = (num) => num.toString().padStart(3, '0');
+    const getStatusText = (s) => ({ available: 'Disponível ✅', reserved: 'Reservado ⏳', paid: 'Pago 💰' }[s] || s);
+
+    function showToast(message, type = '') {
+        const toast = elements.toast;
+        toast.textContent = message;
+        toast.className = 'toast ' + type;
+        toast.style.display = 'block';
+        clearTimeout(toast._timeout);
+        toast._timeout = setTimeout(() => { toast.style.display = 'none'; }, 5000);
+    }
+
+    // ==================== ESTATÍSTICAS E RELATÓRIOS ====================
+
+    function updateStats(data) {
+        let available = 0, reserved = 0, paid = 0, revenue = 0;
+        const overdue = [];
+        const now = Date.now();
+        const dayInMs = 24 * 60 * 60 * 1000;
+
+        for (let i = 0; i < TOTAL_NUMBERS; i++) {
+            const item = data[i];
+            if (!item) { available++; continue; }
+            const status = item.status || 'available';
+            if (status === 'available') available++;
+            else if (status === 'reserved') {
+                reserved++;
+                if (item.timestamp && (now - item.timestamp) > dayInMs) {
+                    overdue.push({ number: i, name: item.user?.name || 'Desconhecido', phone: item.user?.phone || '' });
+                }
+            } else if (status === 'paid') {
+                paid++;
+                revenue += 10;
+            }
         }
 
-        // ==================== RESERVA RÁPIDA VIA WHATSAPP ====================
+        elements.availableCount.textContent = available;
+        elements.reservedCount.textContent = reserved;
+        elements.paidCount.textContent = paid;
+        elements.buyBtn.disabled = isProcessing || available === 0;
 
-        function extractDataFromText() {
-            const text = elements.quickPaste.value.trim();
-            if (!text) {
-                showToast('⚠️ Cole a mensagem do WhatsApp primeiro.', 'error');
-                return;
+        elements.statTotal.textContent = TOTAL_NUMBERS;
+        elements.statAvailable.textContent = available;
+        elements.statReserved.textContent = reserved;
+        elements.statPaid.textContent = paid;
+        elements.statRevenue.textContent = `R$ ${revenue.toFixed(2)}`;
+
+        elements.statOverdue.textContent = overdue.length;
+        
+        if (overdue.length > 0) {
+            let html = '';
+            overdue.slice(0, 10).forEach(item => {
+                const phoneClean = item.phone.replace(/\D/g, '');
+                const numbersStr = formatNumber(item.number);
+                const message = encodeURIComponent(
+                    `Oi, sua reserva está perto de expirar. ` +
+                    `Assim que possível me envie o comprovante do pagamento para não perder ` +
+                    `os números selecionados anteriormente. Obrigada!!`
+                );
+                const whatsappUrl = phoneClean.length >= 10 
+                    ? `https://wa.me/55${phoneClean}?text=${message}`
+                    : '#';
+                
+                html += `<div class="stat-row" style="font-size:0.85rem; display:flex; justify-content:space-between; align-items:center; gap:5px; padding:4px 0;">
+                    <span style="flex:1;">#${formatNumber(item.number)} - ${item.name}</span>
+                    <span style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:0.75rem; color:#666;">${item.phone}</span>
+                        ${phoneClean.length >= 10 ? 
+                            `<a href="${whatsappUrl}" target="_blank" class="btn btn-sm btn-success" style="padding:2px 10px; font-size:0.7rem; text-decoration:none; color:white; background:#25D366; border-radius:4px; border:none; cursor:pointer; display:inline-block;">📱</a>` : 
+                            `<span style="font-size:0.6rem; color:#999;">(sem telefone)</span>`}
+                    </span>
+                </div>`;
+            });
+            if (overdue.length > 10) {
+                html += `<div class="stat-row" style="font-size:0.85rem; color:#888;">... e mais ${overdue.length - 10}</div>`;
             }
+            elements.overdueList.innerHTML = html;
+        } else {
+            elements.overdueList.innerHTML = '<div style="color:#888; font-size:0.9rem;">Nenhuma reserva em atraso.</div>';
+        }
+    }
 
-            let name = '';
-            let phone = '';
-            let qty = 1;
+    // ==================== BUSCA POR DETENTOR (SORTEIO) ====================
 
-            const phoneRegex = /(\(?\d{2}\)?\s?)?\d{5}-\d{4}/;
-            const phoneMatch = text.match(phoneRegex);
-            if (phoneMatch) {
-                phone = phoneMatch[0];
-            }
+    function searchWinner() {
+        const input = elements.winnerSearchInput.value.trim();
+        if (!input) { showToast('⚠️ Digite um número.', 'error'); return; }
 
-            const qtyRegex = /(\d+)\s*(?:n[uú]mero|n°|nº|n)(?:s)?/i;
-            const qtyMatch = text.match(qtyRegex);
-            if (qtyMatch) {
-                qty = parseInt(qtyMatch[1]);
-                if (qty > 10) qty = 10;
-                if (qty < 1) qty = 1;
-            }
+        const number = parseInt(input);
+        if (isNaN(number) || number < 0 || number > 999) {
+            showToast('⚠️ Número inválido. Digite um número entre 000 e 999.', 'error');
+            return;
+        }
 
-            let phonePosition = -1;
-            if (phone) {
-                const phoneClean = phone.replace(/\D/g, '');
-                for (let i = 0; i < text.length; i++) {
-                    const substr = text.substring(i, i + 15).replace(/\D/g, '');
-                    if (substr.includes(phoneClean)) {
-                        phonePosition = i;
-                        break;
-                    }
+        if (!numbersData) { showToast('⚠️ Carregando dados...', 'error'); return; }
+
+        const data = numbersData[number];
+        const resultDiv = elements.winnerResult;
+        const userInfo = elements.winnerUserInfo;
+        const notFound = elements.winnerNotFound;
+
+        elements.winnerNumber.textContent = formatNumber(number);
+
+        if (!data || data.status === 'available') {
+            elements.winnerStatus.textContent = 'Disponível ✅';
+            userInfo.style.display = 'none';
+            notFound.style.display = 'block';
+            resultDiv.style.display = 'block';
+            return;
+        }
+
+        notFound.style.display = 'none';
+        elements.winnerStatus.textContent = getStatusText(data.status);
+
+        if (data.user) {
+            userInfo.style.display = 'block';
+            elements.winnerName.textContent = data.user.name || 'N/A';
+            elements.winnerPhone.textContent = data.user.phone || 'N/A';
+            elements.winnerTransaction.textContent = data.transactionId || 'N/A';
+            elements.winnerContactBtn.onclick = () => {
+                const phone = data.user.phone.replace(/\D/g, '');
+                if (phone.length >= 10) {
+                    window.open(`https://wa.me/55${phone}?text=Olá! Vi que você está com o número ${formatNumber(number)} da rifa.`, '_blank');
+                } else {
+                    showToast('⚠️ Telefone não disponível.', 'error');
+                }
+            };
+        } else {
+            userInfo.style.display = 'none';
+        }
+
+        resultDiv.style.display = 'block';
+    }
+
+    // ==================== RESERVA RÁPIDA VIA WHATSAPP ====================
+
+    function extractDataFromText() {
+        const text = elements.quickPaste.value.trim();
+        if (!text) {
+            showToast('⚠️ Cole a mensagem do WhatsApp primeiro.', 'error');
+            return;
+        }
+
+        let name = '';
+        let phone = '';
+        let qty = 1;
+
+        const phoneRegex = /(\(?\d{2}\)?\s?)?\d{5}-\d{4}/;
+        const phoneMatch = text.match(phoneRegex);
+        if (phoneMatch) {
+            phone = phoneMatch[0];
+        }
+
+        const qtyRegex = /(\d+)\s*(?:n[uú]mero|n°|nº|n)(?:s)?/i;
+        const qtyMatch = text.match(qtyRegex);
+        if (qtyMatch) {
+            qty = parseInt(qtyMatch[1]);
+            if (qty > 10) qty = 10;
+            if (qty < 1) qty = 1;
+        }
+
+        let phonePosition = -1;
+        if (phone) {
+            const phoneClean = phone.replace(/\D/g, '');
+            for (let i = 0; i < text.length; i++) {
+                const substr = text.substring(i, i + 15).replace(/\D/g, '');
+                if (substr.includes(phoneClean)) {
+                    phonePosition = i;
+                    break;
                 }
             }
+        }
 
-            if (phonePosition > -1) {
-                const beforePhone = text.substring(0, phonePosition).trim();
-                const lastExclamation = beforePhone.lastIndexOf('!');
-                if (lastExclamation > -1) {
-                    name = beforePhone.substring(lastExclamation + 1).trim();
+        if (phonePosition > -1) {
+            const beforePhone = text.substring(0, phonePosition).trim();
+            const lastExclamation = beforePhone.lastIndexOf('!');
+            if (lastExclamation > -1) {
+                name = beforePhone.substring(lastExclamation + 1).trim();
+            } else {
+                name = beforePhone;
+            }
+        } else {
+            const parts = text.split('!');
+            if (parts.length >= 2) {
+                const lastPart = parts[parts.length - 1].trim();
+                name = lastPart.replace(/^\d+\s*/, '');
+            }
+        }
+
+        if (name) {
+            name = name.replace(/^Separe\s*/i, '');
+            name = name.replace(/\s*pra mim!?\s*$/i, '');
+            name = name.replace(/\s*para mim!?\s*$/i, '');
+            name = name.replace(/^,\s*/, '');
+            name = name.replace(/,\s*$/, '');
+            name = name.trim();
+        }
+
+        if (!name || name.length < 2) {
+            if (phone) {
+                const beforePhone = text.split(phone)[0].trim();
+                const parts = beforePhone.split('!');
+                if (parts.length >= 2) {
+                    name = parts[parts.length - 1].trim();
                 } else {
                     name = beforePhone;
                 }
-            } else {
-                const parts = text.split('!');
-                if (parts.length >= 2) {
-                    const lastPart = parts[parts.length - 1].trim();
-                    name = lastPart.replace(/^\d+\s*/, '');
+            }
+        }
+
+        if (!name || name.length < 2) {
+            showToast('⚠️ Não foi possível extrair o nome. Verifique a mensagem.', 'error');
+            return;
+        }
+
+        if (phone) {
+            const digits = phone.replace(/\D/g, '');
+            if (digits.length === 11) {
+                phone = `(${digits.slice(0,2)}) ${digits.slice(2,7)}-${digits.slice(7)}`;
+            } else if (digits.length === 10) {
+                phone = `(${digits.slice(0,2)}) ${digits.slice(2,6)}-${digits.slice(6)}`;
+            }
+        }
+
+        quickExtractedData = { name, phone, qty };
+        elements.extractName.textContent = name;
+        elements.extractPhone.textContent = phone || 'Não identificado';
+        elements.extractQty.textContent = qty;
+        elements.extractedData.style.display = 'block';
+        showToast('✅ Dados extraídos com sucesso!', 'success');
+    }
+
+    async function quickReserveWhatsApp() {
+        if (!isAdmin) {
+            showToast('⚠️ Faça login como admin primeiro.', 'error');
+            return;
+        }
+        if (!quickExtractedData) {
+            showToast('⚠️ Extraia os dados primeiro.', 'error');
+            return;
+        }
+
+        const { name, phone, qty } = quickExtractedData;
+        if (!name) {
+            showToast('⚠️ Nome não identificado.', 'error');
+            return;
+        }
+
+        const snapshot = await database.ref('raffleNumbers').once('value');
+        const data = snapshot.val();
+        if (!data) {
+            showToast('📦 Nenhum número disponível.', 'error');
+            return;
+        }
+
+        const availableNumbers = [];
+        for (let i = 0; i < TOTAL_NUMBERS; i++) {
+            if (data[i] && data[i].status === 'available') {
+                availableNumbers.push(i);
+            }
+        }
+
+        if (availableNumbers.length < qty) {
+            showToast(`⚠️ Apenas ${availableNumbers.length} números disponíveis.`, 'error');
+            return;
+        }
+
+        for (let i = availableNumbers.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [availableNumbers[i], availableNumbers[j]] = [availableNumbers[j], availableNumbers[i]];
+        }
+
+        const selected = availableNumbers.slice(0, qty);
+        const userData = { name, phone };
+        const transactionId = database.ref('transactions').push().key;
+
+        const updates = {};
+        selected.forEach(num => {
+            updates[`raffleNumbers/${num}`] = {
+                status: 'reserved',
+                user: userData,
+                transactionId: transactionId,
+                timestamp: Date.now()
+            };
+        });
+        updates[`transactions/${transactionId}`] = {
+            id: transactionId,
+            numbers: selected,
+            user: userData,
+            total: selected.length * 10,
+            timestamp: Date.now(),
+            status: 'reserved'
+        };
+
+        await database.ref().update(updates);
+
+        const formatted = selected.map(n => formatNumber(n)).join(', ');
+
+        elements.reserveTransactionId.textContent = transactionId;
+        elements.reserveNumbersList.textContent = formatted;
+        elements.reserveResult.style.display = 'block';
+
+        navigator.clipboard.writeText(transactionId).then(() => {
+            console.log('ID da transação copiado para a área de transferência.');
+        }).catch(err => {
+            console.log('Não foi possível copiar o ID automaticamente.');
+        });
+
+        elements.transactionSearchInput.value = transactionId;
+
+        setTimeout(() => {
+            searchTransaction();
+        }, 1000);
+
+        showToast(`✅ ${selected.length} números reservados!\n🆔 ID: ${transactionId}`, 'success');
+
+        loadNumbers();
+        quickExtractedData = null;
+    }
+
+    // ==================== BUSCAS ====================
+
+    function searchByPhone() {
+        const phone = elements.phoneSearchInput.value.trim();
+        if (!phone) { showToast('⚠️ Digite um telefone.', 'error'); return; }
+
+        const phoneDigits = phone.replace(/\D/g, '');
+        if (phoneDigits.length < 10) { showToast('⚠️ Telefone inválido.', 'error'); return; }
+
+        if (!numbersData) { showToast('⚠️ Carregando dados...', 'error'); return; }
+
+        const results = [];
+        for (let i = 0; i < TOTAL_NUMBERS; i++) {
+            const item = numbersData[i];
+            if (item && item.user && item.user.phone) {
+                const itemDigits = item.user.phone.replace(/\D/g, '');
+                if (itemDigits.includes(phoneDigits) || phoneDigits.includes(itemDigits)) {
+                    results.push({ number: i, ...item });
                 }
             }
+        }
 
-            if (name) {
-                name = name.replace(/^Separe\s*/i, '');
-                name = name.replace(/\s*pra mim!?\s*$/i, '');
-                name = name.replace(/\s*para mim!?\s*$/i, '');
-                name = name.replace(/^,\s*/, '');
-                name = name.replace(/,\s*$/, '');
-                name = name.trim();
+        const container = elements.phoneSearchResult;
+        if (results.length === 0) {
+            container.innerHTML = '<p style="color:#888;">Nenhum resultado encontrado.</p>';
+        } else {
+            let html = `<p><strong>${results.length} resultado(s) encontrado(s):</strong></p><div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">`;
+            results.forEach(r => {
+                const color = r.status === 'available' ? '#2e7d32' : r.status === 'reserved' ? '#e65100' : '#1a237e';
+                html += `<div style="background:${color}; color:white; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:0.9rem;" onclick="handleNumberClick(${r.number}, '${r.status}', ${JSON.stringify(r.user).replace(/"/g, '&quot;')}, '${r.transactionId || ''}')">
+                    #${formatNumber(r.number)} - ${r.user?.name || 'N/A'} (${r.status})
+                </div>`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        container.style.display = 'block';
+    }
+
+    function searchByName() {
+        const name = elements.nameSearchInput.value.trim().toLowerCase();
+        if (!name || name.length < 3) { showToast('⚠️ Digite pelo menos 3 caracteres.', 'error'); return; }
+
+        if (!numbersData) { showToast('⚠️ Carregando dados...', 'error'); return; }
+
+        const results = [];
+        for (let i = 0; i < TOTAL_NUMBERS; i++) {
+            const item = numbersData[i];
+            if (item && item.user && item.user.name) {
+                const itemName = item.user.name.toLowerCase();
+                if (itemName.includes(name)) {
+                    results.push({ number: i, ...item });
+                }
+            }
+        }
+
+        const container = elements.nameSearchResult;
+        if (results.length === 0) {
+            container.innerHTML = '<p style="color:#888;">Nenhum resultado encontrado.</p>';
+        } else {
+            let html = `<p><strong>${results.length} resultado(s) encontrado(s):</strong></p><div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">`;
+            results.forEach(r => {
+                const color = r.status === 'available' ? '#2e7d32' : r.status === 'reserved' ? '#e65100' : '#1a237e';
+                html += `<div style="background:${color}; color:white; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:0.9rem;" onclick="handleNumberClick(${r.number}, '${r.status}', ${JSON.stringify(r.user).replace(/"/g, '&quot;')}, '${r.transactionId || ''}')">
+                    #${formatNumber(r.number)} - ${r.user?.name || 'N/A'} (${r.status})
+                </div>`;
+            });
+            html += '</div>';
+            container.innerHTML = html;
+        }
+        container.style.display = 'block';
+    }
+
+    // ==================== FILTROS ====================
+
+    function filterNumbersByStatus(status) {
+        if (!numbersData) {
+            showToast('⚠️ Carregando dados...', 'error');
+            return;
+        }
+
+        currentFilter = status;
+        const filtered = [];
+
+        for (let i = 0; i < TOTAL_NUMBERS; i++) {
+            const data = numbersData[i] || { status: 'available' };
+            if (status === 'all') {
+                filtered.push({ number: i, ...data });
+            } else if (data.status === status) {
+                filtered.push({ number: i, ...data });
+            }
+        }
+
+        filteredNumbers = filtered;
+        elements.filterTotalCount.textContent = filtered.length;
+
+        filtered.sort((a, b) => a.number - b.number);
+        showFilteredNumbers(filtered, status);
+    }
+
+    function showFilteredNumbers(filtered, status) {
+        const grid = elements.filterNumbersGrid;
+        grid.innerHTML = '';
+
+        if (filtered.length === 0) {
+            grid.innerHTML = '<p style="text-align:center; padding:20px; color:#888;">Nenhum bilhete encontrado com este status.</p>';
+            elements.filterModal.style.display = 'block';
+            return;
+        }
+
+        const statusNames = {
+            'all': '📊 Todos os Bilhetes',
+            'available': '📦 Bilhetes Disponíveis',
+            'reserved': '⏳ Bilhetes Reservados',
+            'paid': '💰 Bilhetes Pagos'
+        };
+        elements.filterModalTitle.textContent = statusNames[status] || 'Bilhetes Filtrados';
+
+        if (status === 'reserved') {
+            elements.filterMarkAllPaid.style.display = 'inline-block';
+            elements.filterCancelAll.style.display = 'inline-block';
+            elements.filterMarkAllPaid.textContent = '✅ Marcar todos como Pago';
+            elements.filterCancelAll.textContent = '❌ Cancelar todos';
+            elements.filterMarkAllPaid.onclick = () => bulkAction('paid', filtered);
+            elements.filterCancelAll.onclick = () => bulkAction('cancel', filtered);
+        } else if (status === 'paid') {
+            elements.filterMarkAllPaid.style.display = 'none';
+            elements.filterCancelAll.style.display = 'inline-block';
+            elements.filterCancelAll.textContent = '❌ Cancelar todos (voltar para disponível)';
+            elements.filterCancelAll.onclick = () => bulkAction('cancel', filtered);
+        } else {
+            elements.filterMarkAllPaid.style.display = 'none';
+            elements.filterCancelAll.style.display = 'none';
+        }
+
+        for (const item of filtered) {
+            const div = document.createElement('div');
+            const statusColors = {
+                'available': '#2e7d32',
+                'reserved': '#e65100',
+                'paid': '#1a237e'
+            };
+            const statusBg = statusColors[item.status] || '#666';
+
+            div.style.cssText = `
+                padding: 10px 4px;
+                text-align: center;
+                font-size: 0.85rem;
+                border-radius: 6px;
+                font-weight: bold;
+                cursor: pointer;
+                background: ${statusBg};
+                color: white;
+                border: 2px solid ${statusBg};
+                transition: all 0.2s ease;
+            `;
+            div.textContent = formatNumber(item.number);
+            div.title = `Nº ${formatNumber(item.number)} - ${getStatusText(item.status)}`;
+
+            if (item.user) {
+                const userInfo = document.createElement('div');
+                userInfo.style.cssText = `
+                    font-size: 0.6rem;
+                    margin-top: 2px;
+                    opacity: 0.85;
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                    white-space: nowrap;
+                `;
+                userInfo.textContent = item.user.name.split(' ').slice(0, 2).join(' ');
+                div.appendChild(userInfo);
             }
 
-            if (!name || name.length < 2) {
-                if (phone) {
-                    const beforePhone = text.split(phone)[0].trim();
-                    const parts = beforePhone.split('!');
-                    if (parts.length >= 2) {
-                        name = parts[parts.length - 1].trim();
-                    } else {
-                        name = beforePhone;
+            div.onmouseover = function() {
+                this.style.transform = 'scale(1.08)';
+                this.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+                this.style.zIndex = '10';
+            };
+            div.onmouseout = function() {
+                this.style.transform = 'scale(1)';
+                this.style.boxShadow = 'none';
+                this.style.zIndex = 'auto';
+            };
+
+            div.onclick = () => {
+                elements.filterModal.style.display = 'none';
+                handleNumberClick(item.number, item.status, item.user, item.transactionId);
+            };
+
+            grid.appendChild(div);
+        }
+
+        elements.filterModal.style.display = 'block';
+    }
+
+    async function bulkAction(action, filtered) {
+        const statusNames = {
+            'paid': 'pagos',
+            'cancel': 'cancelados (voltarão para disponível)'
+        };
+
+        if (!confirm(`Deseja realmente marcar ${filtered.length} bilhetes como ${statusNames[action]}?`)) {
+            return;
+        }
+
+        const btn = action === 'paid' ? elements.filterMarkAllPaid : elements.filterCancelAll;
+        btn.disabled = true;
+        btn.textContent = '⏳ Processando...';
+
+        try {
+            const updates = {};
+            const transactionIds = new Set();
+
+            for (const item of filtered) {
+                if (action === 'paid') {
+                    updates[`raffleNumbers/${item.number}/status`] = 'paid';
+                    if (item.transactionId) {
+                        transactionIds.add(item.transactionId);
+                    }
+                } else if (action === 'cancel') {
+                    updates[`raffleNumbers/${item.number}`] = { status: 'available' };
+                    if (item.transactionId) {
+                        transactionIds.add(item.transactionId);
                     }
                 }
             }
 
-            if (!name || name.length < 2) {
-                showToast('⚠️ Não foi possível extrair o nome. Verifique a mensagem.', 'error');
-                return;
-            }
-
-            if (phone) {
-                const digits = phone.replace(/\D/g, '');
-                if (digits.length === 11) {
-                    phone = `(${digits.slice(0,2)}) ${digits.slice(2,7)}-${digits.slice(7)}`;
-                } else if (digits.length === 10) {
-                    phone = `(${digits.slice(0,2)}) ${digits.slice(2,6)}-${digits.slice(6)}`;
+            for (const txId of transactionIds) {
+                if (action === 'paid') {
+                    updates[`transactions/${txId}/status`] = 'paid';
+                } else if (action === 'cancel') {
+                    updates[`transactions/${txId}`] = null;
                 }
             }
 
-            quickExtractedData = { name, phone, qty };
-            elements.extractName.textContent = name;
-            elements.extractPhone.textContent = phone || 'Não identificado';
-            elements.extractQty.textContent = qty;
-            elements.extractedData.style.display = 'block';
-            showToast('✅ Dados extraídos com sucesso!', 'success');
+            await database.ref().update(updates);
+
+            showToast(`✅ ${filtered.length} bilhetes ${statusNames[action]} com sucesso!`, 'success');
+            loadNumbers();
+            elements.filterModal.style.display = 'none';
+
+        } catch (error) {
+            console.error(error);
+            showToast('❌ Erro ao processar ação em massa: ' + error.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.textContent = action === 'paid' ? '✅ Marcar todos como Pago' : '❌ Cancelar todos';
+        }
+    }
+
+    // ==================== RESERVA RÁPIDA COM SELEÇÃO ====================
+
+    function renderQuickNumberGrid() {
+        const grid = elements.quickNumberGrid;
+        grid.innerHTML = '';
+
+        if (!numbersData) {
+            grid.innerHTML = '<p style="text-align:center; color:#888;">Carregando números...</p>';
+            return;
         }
 
-        async function quickReserveWhatsApp() {
-            if (!isAdmin) {
-                showToast('⚠️ Faça login como admin primeiro.', 'error');
-                return;
-            }
-            if (!quickExtractedData) {
-                showToast('⚠️ Extraia os dados primeiro.', 'error');
-                return;
+        for (let i = 0; i < TOTAL_NUMBERS; i++) {
+            const item = numbersData[i];
+            const status = item?.status || 'available';
+            const isSelected = selectedQuickNumbers.has(i);
+            const isAvailable = status === 'available';
+
+            const div = document.createElement('div');
+            div.className = 'num-item';
+            if (isSelected) div.classList.add('selected');
+            if (!isAvailable) div.classList.add('unavailable');
+            div.textContent = formatNumber(i);
+
+            if (isAvailable) {
+                div.onclick = () => {
+                    if (selectedQuickNumbers.has(i)) {
+                        selectedQuickNumbers.delete(i);
+                    } else {
+                        selectedQuickNumbers.add(i);
+                    }
+                    renderQuickNumberGrid();
+                    updateQuickSelectedCount();
+                };
             }
 
-            const { name, phone, qty } = quickExtractedData;
-            if (!name) {
-                showToast('⚠️ Nome não identificado.', 'error');
-                return;
-            }
+            grid.appendChild(div);
+        }
 
-            const snapshot = await database.ref('raffleNumbers').once('value');
-            const data = snapshot.val();
-            if (!data) {
-                showToast('📦 Nenhum número disponível.', 'error');
-                return;
-            }
+        updateQuickSelectedCount();
+    }
 
-            const availableNumbers = [];
-            for (let i = 0; i < TOTAL_NUMBERS; i++) {
-                if (data[i] && data[i].status === 'available') {
-                    availableNumbers.push(i);
-                }
-            }
+    function updateQuickSelectedCount() {
+        const count = selectedQuickNumbers.size;
+        elements.quickSelectedCount.textContent = count;
+        elements.quickReserveSelected.disabled = count === 0;
+    }
 
-            if (availableNumbers.length < qty) {
-                showToast(`⚠️ Apenas ${availableNumbers.length} números disponíveis.`, 'error');
-                return;
-            }
+    async function quickReserveSelected() {
+        if (selectedQuickNumbers.size === 0) {
+            showToast('⚠️ Selecione pelo menos um número.', 'error');
+            return;
+        }
 
-            for (let i = availableNumbers.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [availableNumbers[i], availableNumbers[j]] = [availableNumbers[j], availableNumbers[i]];
-            }
+        const name = elements.quickReserveName.value.trim();
+        const phone = elements.quickReservePhone.value.trim();
 
-            const selected = availableNumbers.slice(0, qty);
+        if (!name) {
+            showToast('⚠️ Informe o nome do comprador.', 'error');
+            return;
+        }
+
+        if (!phone) {
+            showToast('⚠️ Informe o telefone do comprador.', 'error');
+            return;
+        }
+
+        const phoneDigits = phone.replace(/\D/g, '');
+        if (phoneDigits.length < 10) {
+            showToast('⚠️ Telefone inválido.', 'error');
+            return;
+        }
+
+        if (!confirm(`Reservar ${selectedQuickNumbers.size} número(s) para ${name}?`)) {
+            return;
+        }
+
+        elements.quickReserveSelected.disabled = true;
+        elements.quickReserveSelected.textContent = '⏳ ...';
+
+        try {
+            const selected = Array.from(selectedQuickNumbers).sort((a, b) => a - b);
             const userData = { name, phone };
             const transactionId = database.ref('transactions').push().key;
 
@@ -1494,544 +1890,798 @@ const message = encodeURIComponent(
             await database.ref().update(updates);
 
             const formatted = selected.map(n => formatNumber(n)).join(', ');
+            elements.quickReserveTxid.textContent = transactionId;
+            elements.quickReserveNumbers.textContent = formatted;
+            elements.quickReserveResult.style.display = 'block';
 
-            elements.reserveTransactionId.textContent = transactionId;
-            elements.reserveNumbersList.textContent = formatted;
-            elements.reserveResult.style.display = 'block';
+            selectedQuickNumbers.clear();
+            renderQuickNumberGrid();
+            updateQuickSelectedCount();
 
-            navigator.clipboard.writeText(transactionId).then(() => {
-                console.log('ID da transação copiado para a área de transferência.');
-            }).catch(err => {
-                console.log('Não foi possível copiar o ID automaticamente.');
-            });
+            showToast(`✅ ${selected.length} números reservados! ID: ${transactionId}`, 'success');
+            loadNumbers();
 
             elements.transactionSearchInput.value = transactionId;
+            setTimeout(() => searchTransaction(), 500);
 
-            setTimeout(() => {
-                searchTransaction();
-            }, 1000);
+        } catch (error) {
+            console.error(error);
+            showToast('❌ Erro ao reservar: ' + error.message, 'error');
+        } finally {
+            elements.quickReserveSelected.disabled = false;
+            elements.quickReserveSelected.textContent = '🔒 Reservar Selecionados';
+        }
+    }
 
-            showToast(`✅ ${selected.length} números reservados!\n🆔 ID: ${transactionId}`, 'success');
+    // ==================== EDIÇÃO DE DADOS DO COMPRADOR ====================
 
-            loadNumbers();
-            quickExtractedData = null;
+    function openEditClientModal(field) {
+        const name = elements.resultClientNameDisplay.textContent;
+        const phone = elements.resultClientPhoneDisplay.textContent;
+
+        elements.editClientName.value = name;
+        elements.editClientPhone.value = phone;
+        editingField = field;
+        elements.editClientModal.style.display = 'block';
+        elements.editClientMessage.style.display = 'none';
+    }
+
+    async function saveClientEdit() {
+        if (!currentTransactionId) {
+            showToast('⚠️ Nenhuma transação carregada.', 'error');
+            return;
         }
 
-        // ==================== BUSCAS ====================
+        const newName = elements.editClientName.value.trim();
+        const newPhone = elements.editClientPhone.value.trim();
 
-        function searchByPhone() {
-            const phone = elements.phoneSearchInput.value.trim();
-            if (!phone) { showToast('⚠️ Digite um telefone.', 'error'); return; }
-
-            const phoneDigits = phone.replace(/\D/g, '');
-            if (phoneDigits.length < 10) { showToast('⚠️ Telefone inválido.', 'error'); return; }
-
-            if (!numbersData) { showToast('⚠️ Carregando dados...', 'error'); return; }
-
-            const results = [];
-            for (let i = 0; i < TOTAL_NUMBERS; i++) {
-                const item = numbersData[i];
-                if (item && item.user && item.user.phone) {
-                    const itemDigits = item.user.phone.replace(/\D/g, '');
-                    if (itemDigits.includes(phoneDigits) || phoneDigits.includes(itemDigits)) {
-                        results.push({ number: i, ...item });
-                    }
-                }
-            }
-
-            const container = elements.phoneSearchResult;
-            if (results.length === 0) {
-                container.innerHTML = '<p style="color:#888;">Nenhum resultado encontrado.</p>';
-            } else {
-                let html = `<p><strong>${results.length} resultado(s) encontrado(s):</strong></p><div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">`;
-                results.forEach(r => {
-                    const color = r.status === 'available' ? '#2e7d32' : r.status === 'reserved' ? '#e65100' : '#1a237e';
-                    html += `<div style="background:${color}; color:white; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:0.9rem;" onclick="handleNumberClick(${r.number}, '${r.status}', ${JSON.stringify(r.user).replace(/"/g, '&quot;')}, '${r.transactionId || ''}')">
-                        #${formatNumber(r.number)} - ${r.user?.name || 'N/A'} (${r.status})
-                    </div>`;
-                });
-                html += '</div>';
-                container.innerHTML = html;
-            }
-            container.style.display = 'block';
+        if (!newName || !newPhone) {
+            elements.editClientMessage.textContent = '⚠️ Preencha todos os campos.';
+            elements.editClientMessage.className = 'error-message';
+            elements.editClientMessage.style.display = 'block';
+            return;
         }
 
-        function searchByName() {
-            const name = elements.nameSearchInput.value.trim().toLowerCase();
-            if (!name || name.length < 3) { showToast('⚠️ Digite pelo menos 3 caracteres.', 'error'); return; }
-
-            if (!numbersData) { showToast('⚠️ Carregando dados...', 'error'); return; }
-
-            const results = [];
-            for (let i = 0; i < TOTAL_NUMBERS; i++) {
-                const item = numbersData[i];
-                if (item && item.user && item.user.name) {
-                    const itemName = item.user.name.toLowerCase();
-                    if (itemName.includes(name)) {
-                        results.push({ number: i, ...item });
-                    }
-                }
-            }
-
-            const container = elements.nameSearchResult;
-            if (results.length === 0) {
-                container.innerHTML = '<p style="color:#888;">Nenhum resultado encontrado.</p>';
-            } else {
-                let html = `<p><strong>${results.length} resultado(s) encontrado(s):</strong></p><div style="display:flex; flex-wrap:wrap; gap:6px; margin-top:8px;">`;
-                results.forEach(r => {
-                    const color = r.status === 'available' ? '#2e7d32' : r.status === 'reserved' ? '#e65100' : '#1a237e';
-                    html += `<div style="background:${color}; color:white; padding:4px 10px; border-radius:4px; cursor:pointer; font-size:0.9rem;" onclick="handleNumberClick(${r.number}, '${r.status}', ${JSON.stringify(r.user).replace(/"/g, '&quot;')}, '${r.transactionId || ''}')">
-                        #${formatNumber(r.number)} - ${r.user?.name || 'N/A'} (${r.status})
-                    </div>`;
-                });
-                html += '</div>';
-                container.innerHTML = html;
-            }
-            container.style.display = 'block';
+        const phoneDigits = newPhone.replace(/\D/g, '');
+        if (phoneDigits.length < 10) {
+            elements.editClientMessage.textContent = '⚠️ Telefone inválido.';
+            elements.editClientMessage.className = 'error-message';
+            elements.editClientMessage.style.display = 'block';
+            return;
         }
 
-        // ==================== FILTROS ====================
+        elements.saveClientEdit.disabled = true;
+        elements.saveClientEdit.textContent = '⏳ ...';
 
-        function filterNumbersByStatus(status) {
-            if (!numbersData) {
-                showToast('⚠️ Carregando dados...', 'error');
-                return;
+        try {
+            const txSnap = await database.ref(`transactions/${currentTransactionId}`).once('value');
+            if (!txSnap.exists()) {
+                throw new Error('Transação não encontrada.');
             }
 
-            currentFilter = status;
-            const filtered = [];
+            const txData = txSnap.val();
+            const updates = {};
+            const updatedUser = { name: newName, phone: newPhone };
 
-            for (let i = 0; i < TOTAL_NUMBERS; i++) {
-                const data = numbersData[i] || { status: 'available' };
-                if (status === 'all') {
-                    filtered.push({ number: i, ...data });
-                } else if (data.status === status) {
-                    filtered.push({ number: i, ...data });
-                }
-            }
+            updates[`transactions/${currentTransactionId}/user`] = updatedUser;
 
-            filteredNumbers = filtered;
-            elements.filterTotalCount.textContent = filtered.length;
+            txData.numbers.forEach(num => {
+                updates[`raffleNumbers/${num}/user`] = updatedUser;
+            });
 
-            filtered.sort((a, b) => a.number - b.number);
-            showFilteredNumbers(filtered, status);
+            await database.ref().update(updates);
+
+            elements.editClientModal.style.display = 'none';
+            showToast('✅ Dados atualizados com sucesso!', 'success');
+
+            setTimeout(() => searchTransaction(), 300);
+
+        } catch (error) {
+            console.error(error);
+            elements.editClientMessage.textContent = '❌ Erro: ' + error.message;
+            elements.editClientMessage.className = 'error-message';
+            elements.editClientMessage.style.display = 'block';
+        } finally {
+            elements.saveClientEdit.disabled = false;
+            elements.saveClientEdit.textContent = '💾 Salvar';
+        }
+    }
+
+    // ==================== FUNÇÕES PRINCIPAIS ====================
+
+    function toggleContact() {
+        elements.contactInfo.style.display = elements.contactInfo.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function initializeRaffleNumbers() {
+        if (!confirm('Deseja inicializar os 1000 números? Isso irá resetar todos os dados existentes.')) return;
+
+        elements.initBtn.disabled = true;
+        elements.initBtn.textContent = '⏳ Processando...';
+
+        const numbers = {};
+        for (let i = 0; i < TOTAL_NUMBERS; i++) {
+            numbers[i] = { status: 'available' };
         }
 
-        function showFilteredNumbers(filtered, status) {
-            const grid = elements.filterNumbersGrid;
-            grid.innerHTML = '';
-
-            if (filtered.length === 0) {
-                grid.innerHTML = '<p style="text-align:center; padding:20px; color:#888;">Nenhum bilhete encontrado com este status.</p>';
-                elements.filterModal.style.display = 'block';
-                return;
-            }
-
-            const statusNames = {
-                'all': '📊 Todos os Bilhetes',
-                'available': '📦 Bilhetes Disponíveis',
-                'reserved': '⏳ Bilhetes Reservados',
-                'paid': '💰 Bilhetes Pagos'
-            };
-            elements.filterModalTitle.textContent = statusNames[status] || 'Bilhetes Filtrados';
-
-            if (status === 'reserved') {
-                elements.filterMarkAllPaid.style.display = 'inline-block';
-                elements.filterCancelAll.style.display = 'inline-block';
-                elements.filterMarkAllPaid.textContent = '✅ Marcar todos como Pago';
-                elements.filterCancelAll.textContent = '❌ Cancelar todos';
-                elements.filterMarkAllPaid.onclick = () => bulkAction('paid', filtered);
-                elements.filterCancelAll.onclick = () => bulkAction('cancel', filtered);
-            } else if (status === 'paid') {
-                elements.filterMarkAllPaid.style.display = 'none';
-                elements.filterCancelAll.style.display = 'inline-block';
-                elements.filterCancelAll.textContent = '❌ Cancelar todos (voltar para disponível)';
-                elements.filterCancelAll.onclick = () => bulkAction('cancel', filtered);
-            } else {
-                elements.filterMarkAllPaid.style.display = 'none';
-                elements.filterCancelAll.style.display = 'none';
-            }
-
-            for (const item of filtered) {
-                const div = document.createElement('div');
-                const statusColors = {
-                    'available': '#2e7d32',
-                    'reserved': '#e65100',
-                    'paid': '#1a237e'
-                };
-                const statusBg = statusColors[item.status] || '#666';
-
-                div.style.cssText = `
-                    padding: 10px 4px;
-                    text-align: center;
-                    font-size: 0.85rem;
-                    border-radius: 6px;
-                    font-weight: bold;
-                    cursor: pointer;
-                    background: ${statusBg};
-                    color: white;
-                    border: 2px solid ${statusBg};
-                    transition: all 0.2s ease;
-                `;
-                div.textContent = formatNumber(item.number);
-                div.title = `Nº ${formatNumber(item.number)} - ${getStatusText(item.status)}`;
-
-                if (item.user) {
-                    const userInfo = document.createElement('div');
-                    userInfo.style.cssText = `
-                        font-size: 0.6rem;
-                        margin-top: 2px;
-                        opacity: 0.85;
-                        overflow: hidden;
-                        text-overflow: ellipsis;
-                        white-space: nowrap;
-                    `;
-                    userInfo.textContent = item.user.name.split(' ').slice(0, 2).join(' ');
-                    div.appendChild(userInfo);
-                }
-
-                div.onmouseover = function() {
-                    this.style.transform = 'scale(1.08)';
-                    this.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
-                    this.style.zIndex = '10';
-                };
-                div.onmouseout = function() {
-                    this.style.transform = 'scale(1)';
-                    this.style.boxShadow = 'none';
-                    this.style.zIndex = 'auto';
-                };
-
-                div.onclick = () => {
-                    elements.filterModal.style.display = 'none';
-                    handleNumberClick(item.number, item.status, item.user, item.transactionId);
-                };
-
-                grid.appendChild(div);
-            }
-
-            elements.filterModal.style.display = 'block';
-        }
-
-        async function bulkAction(action, filtered) {
-            const statusNames = {
-                'paid': 'pagos',
-                'cancel': 'cancelados (voltarão para disponível)'
-            };
-
-            if (!confirm(`Deseja realmente marcar ${filtered.length} bilhetes como ${statusNames[action]}?`)) {
-                return;
-            }
-
-            const btn = action === 'paid' ? elements.filterMarkAllPaid : elements.filterCancelAll;
-            btn.disabled = true;
-            btn.textContent = '⏳ Processando...';
-
-            try {
-                const updates = {};
-                const transactionIds = new Set();
-
-                for (const item of filtered) {
-                    if (action === 'paid') {
-                        updates[`raffleNumbers/${item.number}/status`] = 'paid';
-                        if (item.transactionId) {
-                            transactionIds.add(item.transactionId);
-                        }
-                    } else if (action === 'cancel') {
-                        updates[`raffleNumbers/${item.number}`] = { status: 'available' };
-                        if (item.transactionId) {
-                            transactionIds.add(item.transactionId);
-                        }
-                    }
-                }
-
-                for (const txId of transactionIds) {
-                    if (action === 'paid') {
-                        updates[`transactions/${txId}/status`] = 'paid';
-                    } else if (action === 'cancel') {
-                        updates[`transactions/${txId}`] = null;
-                    }
-                }
-
-                await database.ref().update(updates);
-
-                showToast(`✅ ${filtered.length} bilhetes ${statusNames[action]} com sucesso!`, 'success');
+        database.ref('raffleNumbers').set(numbers)
+            .then(() => {
+                showToast('✅ 1000 números inicializados com sucesso!', 'success');
                 loadNumbers();
-                elements.filterModal.style.display = 'none';
+            })
+            .catch(err => {
+                console.error(err);
+                showToast('❌ Erro ao inicializar: ' + err.message, 'error');
+            })
+            .finally(() => {
+                elements.initBtn.disabled = false;
+                elements.initBtn.textContent = '📦 Inicializar 1000 números';
+            });
+    }
 
-            } catch (error) {
-                console.error(error);
-                showToast('❌ Erro ao processar ação em massa: ' + error.message, 'error');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = action === 'paid' ? '✅ Marcar todos como Pago' : '❌ Cancelar todos';
-            }
-        }
-
-        // ==================== RESERVA RÁPIDA COM SELEÇÃO ====================
-
-        function renderQuickNumberGrid() {
-            const grid = elements.quickNumberGrid;
-            grid.innerHTML = '';
-
-            if (!numbersData) {
-                grid.innerHTML = '<p style="text-align:center; color:#888;">Carregando números...</p>';
-                return;
-            }
-
-            for (let i = 0; i < TOTAL_NUMBERS; i++) {
-                const item = numbersData[i];
-                const status = item?.status || 'available';
-                const isSelected = selectedQuickNumbers.has(i);
-                const isAvailable = status === 'available';
-
-                const div = document.createElement('div');
-                div.className = 'num-item';
-                if (isSelected) div.classList.add('selected');
-                if (!isAvailable) div.classList.add('unavailable');
-                div.textContent = formatNumber(i);
-
-                if (isAvailable) {
-                    div.onclick = () => {
-                        if (selectedQuickNumbers.has(i)) {
-                            selectedQuickNumbers.delete(i);
-                        } else {
-                            selectedQuickNumbers.add(i);
-                        }
-                        renderQuickNumberGrid();
-                        updateQuickSelectedCount();
-                    };
+    function loadNumbers() {
+        database.ref('raffleNumbers').once('value')
+            .then(snapshot => {
+                if (!snapshot.exists()) {
+                    elements.initBtn.style.display = 'inline-block';
+                    elements.availableCount.textContent = '0';
+                    elements.reservedCount.textContent = '0';
+                    elements.paidCount.textContent = '0';
+                    elements.buyBtn.disabled = true;
+                    showToast('📦 Nenhum número encontrado. Clique em "Inicializar 1000 números" para começar.', '');
+                    return;
                 }
-
-                grid.appendChild(div);
-            }
-
-            updateQuickSelectedCount();
-        }
-
-        function updateQuickSelectedCount() {
-            const count = selectedQuickNumbers.size;
-            elements.quickSelectedCount.textContent = count;
-            elements.quickReserveSelected.disabled = count === 0;
-        }
-
-        async function quickReserveSelected() {
-            if (selectedQuickNumbers.size === 0) {
-                showToast('⚠️ Selecione pelo menos um número.', 'error');
-                return;
-            }
-
-            const name = elements.quickReserveName.value.trim();
-            const phone = elements.quickReservePhone.value.trim();
-
-            if (!name) {
-                showToast('⚠️ Informe o nome do comprador.', 'error');
-                return;
-            }
-
-            if (!phone) {
-                showToast('⚠️ Informe o telefone do comprador.', 'error');
-                return;
-            }
-
-            const phoneDigits = phone.replace(/\D/g, '');
-            if (phoneDigits.length < 10) {
-                showToast('⚠️ Telefone inválido.', 'error');
-                return;
-            }
-
-            if (!confirm(`Reservar ${selectedQuickNumbers.size} número(s) para ${name}?`)) {
-                return;
-            }
-
-            elements.quickReserveSelected.disabled = true;
-            elements.quickReserveSelected.textContent = '⏳ ...';
-
-            try {
-                const selected = Array.from(selectedQuickNumbers).sort((a, b) => a - b);
-                const userData = { name, phone };
-                const transactionId = database.ref('transactions').push().key;
-
-                const updates = {};
-                selected.forEach(num => {
-                    updates[`raffleNumbers/${num}`] = {
-                        status: 'reserved',
-                        user: userData,
-                        transactionId: transactionId,
-                        timestamp: Date.now()
-                    };
-                });
-                updates[`transactions/${transactionId}`] = {
-                    id: transactionId,
-                    numbers: selected,
-                    user: userData,
-                    total: selected.length * 10,
-                    timestamp: Date.now(),
-                    status: 'reserved'
-                };
-
-                await database.ref().update(updates);
-
-                const formatted = selected.map(n => formatNumber(n)).join(', ');
-                elements.quickReserveTxid.textContent = transactionId;
-                elements.quickReserveNumbers.textContent = formatted;
-                elements.quickReserveResult.style.display = 'block';
-
-                selectedQuickNumbers.clear();
+                elements.initBtn.style.display = 'none';
+                numbersData = snapshot.val();
+                updateCounters(numbersData);
+                updateStats(numbersData);
                 renderQuickNumberGrid();
-                updateQuickSelectedCount();
 
-                showToast(`✅ ${selected.length} números reservados! ID: ${transactionId}`, 'success');
-                loadNumbers();
-
-                elements.transactionSearchInput.value = transactionId;
-                setTimeout(() => searchTransaction(), 500);
-
-            } catch (error) {
-                console.error(error);
-                showToast('❌ Erro ao reservar: ' + error.message, 'error');
-            } finally {
-                elements.quickReserveSelected.disabled = false;
-                elements.quickReserveSelected.textContent = '🔒 Reservar Selecionados';
-            }
-        }
-
-        // ==================== EDIÇÃO DE DADOS DO COMPRADOR ====================
-
-        function openEditClientModal(field) {
-            const name = elements.resultClientNameDisplay.textContent;
-            const phone = elements.resultClientPhoneDisplay.textContent;
-
-            elements.editClientName.value = name;
-            elements.editClientPhone.value = phone;
-            editingField = field;
-            elements.editClientModal.style.display = 'block';
-            elements.editClientMessage.style.display = 'none';
-        }
-
-        async function saveClientEdit() {
-            if (!currentTransactionId) {
-                showToast('⚠️ Nenhuma transação carregada.', 'error');
-                return;
-            }
-
-            const newName = elements.editClientName.value.trim();
-            const newPhone = elements.editClientPhone.value.trim();
-
-            if (!newName || !newPhone) {
-                elements.editClientMessage.textContent = '⚠️ Preencha todos os campos.';
-                elements.editClientMessage.className = 'error-message';
-                elements.editClientMessage.style.display = 'block';
-                return;
-            }
-
-            const phoneDigits = newPhone.replace(/\D/g, '');
-            if (phoneDigits.length < 10) {
-                elements.editClientMessage.textContent = '⚠️ Telefone inválido.';
-                elements.editClientMessage.className = 'error-message';
-                elements.editClientMessage.style.display = 'block';
-                return;
-            }
-
-            elements.saveClientEdit.disabled = true;
-            elements.saveClientEdit.textContent = '⏳ ...';
-
-            try {
-                const txSnap = await database.ref(`transactions/${currentTransactionId}`).once('value');
-                if (!txSnap.exists()) {
-                    throw new Error('Transação não encontrada.');
+                if (currentFilter && numbersData) {
+                    const filtered = [];
+                    for (let i = 0; i < TOTAL_NUMBERS; i++) {
+                        const data = numbersData[i] || { status: 'available' };
+                        if (currentFilter === 'all' || data.status === currentFilter) {
+                            filtered.push({ number: i, ...data });
+                        }
+                    }
+                    elements.filterTotalCount.textContent = filtered.length;
                 }
+            })
+            .catch(err => {
+                console.error('Erro ao carregar números:', err);
+                showToast('❌ Erro ao carregar dados: ' + err.message, 'error');
+            });
+    }
 
-                const txData = txSnap.val();
-                const updates = {};
-                const updatedUser = { name: newName, phone: newPhone };
+    function updateCounters(data) {
+        let available = 0, reserved = 0, paid = 0;
+        for (let i = 0; i < TOTAL_NUMBERS; i++) {
+            const status = data[i]?.status || 'available';
+            if (status === 'available') available++;
+            else if (status === 'reserved') reserved++;
+            else if (status === 'paid') paid++;
+        }
+        elements.availableCount.textContent = available;
+        elements.reservedCount.textContent = reserved;
+        elements.paidCount.textContent = paid;
+        elements.buyBtn.disabled = isProcessing || available === 0;
+    }
 
-                updates[`transactions/${currentTransactionId}/user`] = updatedUser;
+    function showAllNumbers() {
+        if (!isAdmin || !numbersData) return;
 
-                txData.numbers.forEach(num => {
-                    updates[`raffleNumbers/${num}/user`] = updatedUser;
+        const grid = elements.allNumbersGrid;
+        grid.innerHTML = '';
+
+        for (let i = 0; i < TOTAL_NUMBERS; i++) {
+            const data = numbersData[i] || { status: 'available' };
+            const div = document.createElement('div');
+            div.style.cssText = `
+                padding: 6px 2px;
+                text-align: center;
+                font-size: 0.7rem;
+                border-radius: 4px;
+                font-weight: bold;
+                cursor: pointer;
+                background: ${data.status === 'available' ? '#2e7d32' : data.status === 'reserved' ? '#e65100' : '#1a237e'};
+                color: white;
+                border: 1px solid ${data.status === 'available' ? '#1b5e20' : data.status === 'reserved' ? '#bf360c' : '#0d1445'};
+            `;
+            div.textContent = formatNumber(i);
+            div.title = `Nº ${formatNumber(i)} - ${getStatusText(data.status)}`;
+            div.onclick = () => {
+                handleNumberClick(i, data.status, data.user, data.transactionId);
+                elements.allNumbersModal.style.display = 'none';
+            };
+            grid.appendChild(div);
+        }
+
+        elements.allNumbersModal.style.display = 'block';
+    }
+
+    function handleNumberClick(number, status, user, txId) {
+        if (!isAdmin) return;
+
+        currentAdminNumber = number;
+        elements.adminNumber.textContent = formatNumber(number);
+        elements.adminStatus.textContent = getStatusText(status);
+
+        if (status === 'reserved' || status === 'paid') {
+            elements.adminUserInfo.style.display = 'block';
+            elements.adminName.textContent = user?.name || 'N/A';
+            elements.adminPhone.textContent = user?.phone || 'N/A';
+            elements.adminTransactionId.textContent = txId || 'N/A';
+            elements.adminContactBtn.style.display = (user?.phone && user.phone !== 'N/A') ? 'inline-block' : 'none';
+        } else {
+            elements.adminUserInfo.style.display = 'none';
+        }
+
+        elements.markPaidBtn.style.display = status === 'reserved' ? 'inline-block' : 'none';
+        elements.removeReservationBtn.style.display = (status === 'reserved' || status === 'paid') ? 'inline-block' : 'none';
+        elements.removeReservationBtn.textContent = status === 'paid' ? 'Cancelar Compra' : 'Remover Reserva';
+        elements.markPaidBtn.onclick = () => markNumberPaid(number);
+        elements.removeReservationBtn.onclick = () => removeReservation(number);
+        elements.adminModal.style.display = 'block';
+    }
+
+    function openBuyModal() {
+        if (isProcessing) return;
+
+        database.ref('raffleNumbers').once('value').then(snap => {
+            const data = snap.val();
+            if (!data) {
+                showToast('📦 Nenhum número disponível. Inicialize a rifa primeiro.', 'error');
+                return;
+            }
+
+            let available = 0;
+            for (let i = 0; i < TOTAL_NUMBERS; i++) {
+                if (data[i] && data[i].status === 'available') available++;
+            }
+            if (available === 0) {
+                showToast('⚠️ Todos os números já foram vendidos!', 'error');
+                return;
+            }
+
+            const maxQ = Math.min(10, available);
+            elements.buyQuantity.innerHTML = '';
+            for (let q = 1; q <= maxQ; q++) {
+                const opt = document.createElement('option');
+                opt.value = q;
+                opt.textContent = q;
+                elements.buyQuantity.appendChild(opt);
+            }
+            updateBuyTotal();
+            elements.buyModal.style.display = 'block';
+            elements.buyName.value = '';
+            elements.buyPhone.value = '';
+            setTimeout(() => elements.buyName.focus(), 100);
+        });
+    }
+
+    function updateBuyTotal() {
+        const qty = parseInt(elements.buyQuantity.value) || 1;
+        elements.buyTotal.textContent = qty * 10;
+    }
+
+    function confirmPurchase() {
+        if (isProcessing) return;
+
+        const name = elements.buyName.value.trim();
+        const phone = elements.buyPhone.value.trim();
+        const qty = parseInt(elements.buyQuantity.value) || 1;
+
+        if (!name || !phone) {
+            showToast('⚠️ Preencha todos os campos.', 'error');
+            return;
+        }
+        const phoneDigits = phone.replace(/\D/g, '');
+        if (phoneDigits.length < 11) {
+            showToast('⚠️ Telefone inválido. Use DDD e número.', 'error');
+            return;
+        }
+
+        const msg = `Oi, quero participar da rifa! Separe ${qty} número(s) pra mim!\n${name}\n${phone}`;
+
+        elements.buyModal.style.display = 'none';
+        window.open(`https://wa.me/5512997473756?text=${encodeURIComponent(msg)}`, '_blank');
+
+        showToast('📱 Se o WhatsApp não abrir automaticamente, entre em contato com (12) 99747-3756 para finalizar seu pedido.', 'info');
+    }
+
+    function searchTransaction() {
+        const id = elements.transactionSearchInput.value.trim();
+        if (!id) { showToast('⚠️ Digite um ID de transação.', 'error'); return; }
+
+        elements.transactionResult.style.display = 'none';
+        elements.transactionActionMessage.style.display = 'none';
+
+        database.ref(`transactions/${id}`).once('value').then(snap => {
+            if (!snap.exists()) {
+                showToast('❌ Transação não encontrada.', 'error');
+                return;
+            }
+            const data = snap.val();
+            currentTransactionId = id;
+            elements.resultTransactionId.textContent = data.id;
+            elements.resultClientNameDisplay.textContent = data.user.name;
+            elements.resultClientPhoneDisplay.textContent = data.user.phone;
+            elements.resultDate.textContent = new Date(data.timestamp).toLocaleString('pt-BR');
+            elements.resultTotalValue.textContent = data.total.toFixed(2);
+            elements.resultNumbers.innerHTML = '';
+            data.numbers.forEach(num => {
+                const span = document.createElement('span');
+                span.className = 'transaction-number';
+                span.textContent = formatNumber(num);
+                elements.resultNumbers.appendChild(span);
+            });
+            elements.transactionResult.style.display = 'block';
+            elements.transactionActionMessage.style.display = 'none';
+            const isPaid = data.status === 'paid';
+            elements.markTransactionPaid.style.display = isPaid ? 'none' : 'inline-block';
+            elements.markTransactionPaid.textContent = isPaid ? '✅ Já Pago' : '✅ Marcar Todos como Pago';
+            if (isPaid) {
+                elements.transactionActionMessage.className = 'success-message';
+                elements.transactionActionMessage.textContent = '✅ Esta transação já foi paga.';
+                elements.transactionActionMessage.style.display = 'block';
+            }
+            showToast('✅ Transação encontrada!', 'success');
+        }).catch(err => {
+            console.error(err);
+            showToast('❌ Erro ao buscar transação.', 'error');
+        });
+    }
+
+    function copyTransactionDetails() {
+        if (!currentTransactionId) {
+            showToast('⚠️ Nenhuma transação carregada para copiar.', 'error');
+            return;
+        }
+
+        const id = elements.resultTransactionId.textContent;
+        const name = elements.resultClientNameDisplay.textContent;
+        const phone = elements.resultClientPhoneDisplay.textContent;
+        const date = elements.resultDate.textContent;
+        const total = elements.resultTotalValue.textContent;
+
+        const numberElements = elements.resultNumbers.querySelectorAll('.transaction-number');
+        const numbers = Array.from(numberElements).map(el => el.textContent).join(', ');
+
+        const message = `✅ *TRANSACÃO CONFIRMADA* ✅\n\n` +
+                        `🆔 *ID:* ${id}\n` +
+                        `👤 *Comprador:* ${name}\n` +
+                        `📱 *Telefone:* ${phone}\n` +
+                        `📅 *Data:* ${date}\n` +
+                        `💰 *Valor:* R$ ${total}\n` +
+                        `🔢 *Bilhete(s):* ${numbers}\n\n` +
+                        `📌 *Status:* Aguardando pagamento\n` +
+                        `💳 *PIX:* (12) 99747-3756`;
+
+        navigator.clipboard.writeText(message).then(() => {
+            showToast('✅ Dados da transação copiados! Cole no WhatsApp.', 'success');
+        }).catch(err => {
+            console.error('Erro ao copiar:', err);
+            const textarea = document.createElement('textarea');
+            textarea.value = message;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast('✅ Dados copiados! Cole no WhatsApp.', 'success');
+        });
+    }
+
+    function markTransactionPaid() {
+        if (!currentTransactionId) return;
+        if (!confirm(`Marcar transação ${currentTransactionId} como paga?`)) return;
+
+        elements.markTransactionPaid.disabled = true;
+        elements.markTransactionPaid.textContent = '⏳ ...';
+
+        database.ref(`transactions/${currentTransactionId}`).once('value').then(snap => {
+            if (!snap.exists()) { showToast('Transação não encontrada.', 'error'); return; }
+            const data = snap.val();
+            if (data.status === 'paid') { showToast('Já paga.', 'error'); return; }
+            const updates = {};
+            data.numbers.forEach(num => { updates[`raffleNumbers/${num}/status`] = 'paid'; });
+            updates[`transactions/${currentTransactionId}/status`] = 'paid';
+            return database.ref().update(updates);
+        }).then(() => {
+            elements.transactionActionMessage.className = 'success-message';
+            elements.transactionActionMessage.textContent = '✅ Pagamento confirmado!';
+            elements.transactionActionMessage.style.display = 'block';
+            elements.markTransactionPaid.style.display = 'none';
+            showToast('✅ Pagamento confirmado com sucesso!', 'success');
+            loadNumbers();
+        }).catch(err => {
+            console.error(err);
+            showToast('❌ Erro: ' + err.message, 'error');
+        }).finally(() => {
+            elements.markTransactionPaid.disabled = false;
+            elements.markTransactionPaid.textContent = '✅ Marcar Todos como Pago';
+        });
+    }
+
+    function cancelTransaction() {
+        if (!currentTransactionId) return;
+        if (!confirm(`Cancelar transação ${currentTransactionId}?`)) return;
+
+        elements.cancelTransaction.disabled = true;
+        elements.cancelTransaction.textContent = '⏳ ...';
+
+        database.ref(`transactions/${currentTransactionId}`).once('value').then(snap => {
+            if (!snap.exists()) { showToast('Transação não encontrada.', 'error'); return; }
+            const data = snap.val();
+            const updates = {};
+            data.numbers.forEach(num => { updates[`raffleNumbers/${num}`] = { status: 'available' }; });
+            updates[`transactions/${currentTransactionId}`] = null;
+            return database.ref().update(updates);
+        }).then(() => {
+            elements.transactionActionMessage.className = 'success-message';
+            elements.transactionActionMessage.textContent = '✅ Transação cancelada.';
+            elements.transactionActionMessage.style.display = 'block';
+            elements.transactionResult.style.display = 'none';
+            elements.transactionSearchInput.value = '';
+            currentTransactionId = null;
+            showToast('✅ Transação cancelada com sucesso!', 'success');
+            loadNumbers();
+        }).catch(err => {
+            console.error(err);
+            showToast('❌ Erro: ' + err.message, 'error');
+        }).finally(() => {
+            elements.cancelTransaction.disabled = false;
+            elements.cancelTransaction.textContent = '❌ Cancelar Transação';
+        });
+    }
+
+    function markNumberPaid(number) {
+        if (!confirm(`Marcar ${formatNumber(number)} como pago?`)) return;
+
+        database.ref(`raffleNumbers/${number}`).once('value').then(snap => {
+            const data = snap.val();
+            if (data.transactionId) {
+                return database.ref(`transactions/${data.transactionId}/status`).set('paid')
+                    .then(() => database.ref(`raffleNumbers/${number}/status`).set('paid'));
+            }
+            return database.ref(`raffleNumbers/${number}/status`).set('paid');
+        }).then(() => {
+            elements.adminModal.style.display = 'none';
+            showToast(`✅ Número ${formatNumber(number)} pago.`, 'success');
+            loadNumbers();
+        }).catch(err => {
+            showToast('❌ Erro: ' + err.message, 'error');
+        });
+    }
+
+    function removeReservation(number) {
+        const action = elements.removeReservationBtn.textContent;
+        if (!confirm(`${action} do número ${formatNumber(number)}?`)) return;
+
+        database.ref(`raffleNumbers/${number}`).once('value').then(snap => {
+            const data = snap.val();
+            if (data.transactionId) {
+                return database.ref(`transactions/${data.transactionId}`).once('value').then(txSnap => {
+                    if (txSnap.exists()) {
+                        const txData = txSnap.val();
+                        const updated = txData.numbers.filter(n => n !== number);
+                        if (updated.length === 0) {
+                            return database.ref(`transactions/${data.transactionId}`).remove()
+                                .then(() => database.ref(`raffleNumbers/${number}`).set({ status: 'available' }));
+                        } else {
+                            return database.ref(`transactions/${data.transactionId}/numbers`).set(updated)
+                                .then(() => database.ref(`raffleNumbers/${number}`).set({ status: 'available' }));
+                        }
+                    }
+                    return database.ref(`raffleNumbers/${number}`).set({ status: 'available' });
                 });
+            }
+            return database.ref(`raffleNumbers/${number}`).set({ status: 'available' });
+        }).then(() => {
+            elements.adminModal.style.display = 'none';
+            showToast(`✅ ${action} realizada.`, 'success');
+            loadNumbers();
+        }).catch(err => {
+            showToast('❌ Erro: ' + err.message, 'error');
+        });
+    }
 
-                await database.ref().update(updates);
+    function showParticipants() {
+        const tbody = elements.participantsTableBody;
+        tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#888;">Carregando...</td></tr>';
+        elements.participantsModal.style.display = 'block';
 
-                elements.editClientModal.style.display = 'none';
-                showToast('✅ Dados atualizados com sucesso!', 'success');
+        database.ref('raffleNumbers').once('value').then(snap => {
+            const data = snap.val();
+            if (!data) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Nenhum participante ainda.</td></tr>';
+                return;
+            }
 
-                setTimeout(() => searchTransaction(), 300);
+            const paidNumbers = [];
+            for (let i = 0; i < TOTAL_NUMBERS; i++) {
+                if (data[i] && data[i].status === 'paid' && data[i].user) {
+                    paidNumbers.push({
+                        number: i,
+                        name: data[i].user.name || 'Desconhecido',
+                        phone: data[i].user.phone || ''
+                    });
+                }
+            }
 
-            } catch (error) {
-                console.error(error);
-                elements.editClientMessage.textContent = '❌ Erro: ' + error.message;
-                elements.editClientMessage.className = 'error-message';
-                elements.editClientMessage.style.display = 'block';
-            } finally {
-                elements.saveClientEdit.disabled = false;
-                elements.saveClientEdit.textContent = '💾 Salvar';
+            if (paidNumbers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Nenhum participante ainda.</td></tr>';
+                return;
+            }
+
+            paidNumbers.sort((a, b) => a.number - b.number);
+
+            let html = '';
+            for (const p of paidNumbers) {
+                let displayPhone = p.phone;
+                if (displayPhone.length >= 8) {
+                    const digits = displayPhone.replace(/\D/g, '');
+                    if (digits.length >= 8) {
+                        const last4 = digits.slice(-4);
+                        const firstPart = digits.slice(0, digits.length - 4);
+                        const hidden = firstPart.slice(0, 2) + 'XXXXX' + last4;
+                        if (displayPhone.includes('(')) {
+                            const ddd = digits.slice(0, 2);
+                            displayPhone = `(${ddd}) ${hidden.slice(2)}`;
+                        } else {
+                            displayPhone = hidden;
+                        }
+                    }
+                }
+                const nameParts = p.name.split(' ');
+                let shortName = nameParts[0];
+                if (nameParts.length > 1) {
+                    shortName += ' ' + nameParts[nameParts.length - 1];
+                }
+                html += `<tr><td>${formatNumber(p.number)}</td><td>${shortName}</td><td>${displayPhone}</td></tr>`;
+            }
+            tbody.innerHTML = html;
+        }).catch(err => {
+            console.error(err);
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:red;">Erro ao carregar participantes.</td></tr>';
+        });
+    }
+
+    function openLoginModal() {
+        if (isAdmin) return;
+        elements.loginModal.style.display = 'block';
+        elements.loginError.style.display = 'none';
+        elements.emailInput.value = '';
+        elements.passwordInput.value = '';
+        setTimeout(() => elements.emailInput.focus(), 100);
+    }
+
+    function loginAdmin() {
+        const email = elements.emailInput.value.trim();
+        const pass = elements.passwordInput.value.trim();
+        if (!email || !pass) {
+            elements.loginError.textContent = '❌ Preencha todos os campos.';
+            elements.loginError.style.display = 'block';
+            return;
+        }
+        elements.confirmLoginBtn.disabled = true;
+        elements.confirmLoginBtn.textContent = '⏳ ...';
+
+        auth.signInWithEmailAndPassword(email, pass).then(cred => {
+            if (cred.user.uid === "0kVyR8O6Wedq881t6EZJOu528Fw1") {
+                elements.loginModal.style.display = 'none';
+                isAdmin = true;
+                elements.adminPanel.style.display = 'block';
+                elements.loginBtn.textContent = '✅ Admin Logado';
+                elements.loginBtn.disabled = true;
+                elements.showAllNumbersBtn.style.display = 'inline-block';
+                loadNumbers();
+            } else {
+                throw new Error('Acesso não autorizado');
+            }
+        }).catch(err => {
+            console.error(err);
+            elements.loginError.textContent = '❌ Email ou senha incorretos.';
+            elements.loginError.style.display = 'block';
+        }).finally(() => {
+            elements.confirmLoginBtn.disabled = false;
+            elements.confirmLoginBtn.textContent = 'Entrar';
+        });
+    }
+
+    function logoutAdmin() {
+        auth.signOut().then(() => {
+            isAdmin = false;
+            elements.adminPanel.style.display = 'none';
+            elements.loginBtn.textContent = '🔑 Login Admin';
+            elements.loginBtn.disabled = false;
+            elements.transactionResult.style.display = 'none';
+            elements.transactionSearchInput.value = '';
+            elements.showAllNumbersBtn.style.display = 'none';
+            currentTransactionId = null;
+            loadNumbers();
+        }).catch(console.error);
+    }
+
+    // ==================== CONTATAR INADIMPLENTES ====================
+
+    async function contactAllOverdue() {
+        if (!isAdmin) {
+            showToast('⚠️ Faça login como admin primeiro.', 'error');
+            return;
+        }
+        
+        if (!numbersData) {
+            showToast('⚠️ Carregando dados...', 'error');
+            return;
+        }
+
+        const now = Date.now();
+        const dayInMs = 24 * 60 * 60 * 1000;
+        const overdue = [];
+
+        for (let i = 0; i < TOTAL_NUMBERS; i++) {
+            const item = numbersData[i];
+            if (item && item.status === 'reserved' && item.timestamp && (now - item.timestamp) > dayInMs) {
+                if (item.user?.phone) {
+                    overdue.push({
+                        number: i,
+                        name: item.user.name || 'Desconhecido',
+                        phone: item.user.phone
+                    });
+                }
             }
         }
 
-        // ==================== FUNÇÕES PRINCIPAIS ====================
+        if (overdue.length === 0) {
+            showToast('✅ Nenhum inadimplente encontrado!', 'success');
+            return;
+        }
 
-        function initApp() {
-            $('#buy-phone').mask('(00) 00000-0000');
-            $('#quick-reserve-phone').mask('(00) 00000-0000');
-            $('#edit-client-phone').mask('(00) 00000-0000');
+        let confirmMsg = `📋 Inadimplentes (${overdue.length}):\n\n`;
+        overdue.forEach((item, index) => {
+            confirmMsg += `${index + 1}. #${formatNumber(item.number)} - ${item.name} (${item.phone})\n`;
+        });
+        confirmMsg += `\nDeseja abrir o WhatsApp para contatar todos?`;
 
-            // Filtros
+        if (!confirm(confirmMsg)) return;
+
+        let opened = 0;
+        for (const item of overdue) {
+            const phoneClean = item.phone.replace(/\D/g, '');
+            if (phoneClean.length >= 10) {
+                const numbersStr = formatNumber(item.number);
+                const message = encodeURIComponent(
+                    `Oi, sua reserva está perto de expirar. ` +
+                    `Assim que possível me envie o comprovante do pagamento para não perder ` +
+                    `os números selecionados anteriormente. Obrigada!!`
+                );
+                const url = `https://wa.me/55${phoneClean}?text=${message}`;
+                
+                setTimeout(() => {
+                    window.open(url, '_blank');
+                }, opened * 1000);
+                opened++;
+            }
+        }
+        
+        showToast(`📱 Abrindo ${opened} conversas no WhatsApp...`, 'info');
+    }
+
+    function contactOverdue(number, name, phone) {
+        if (!isAdmin) {
+            showToast('⚠️ Faça login como admin primeiro.', 'error');
+            return;
+        }
+        
+        const phoneClean = phone.replace(/\D/g, '');
+        if (phoneClean.length < 10) {
+            showToast('⚠️ Telefone inválido.', 'error');
+            return;
+        }
+        
+        const numbersStr = formatNumber(number);
+        const message = encodeURIComponent(
+            `Oi, sua reserva do número ${numbersStr} está perto de expirar. ` +
+            `Assim que possível me envie o comprovante do pagamento para não perder ` +
+            `os números selecionados anteriormente. Obrigada!!`
+        );
+        
+        window.open(`https://wa.me/55${phoneClean}?text=${message}`, '_blank');
+        showToast(`📱 Abrindo WhatsApp para ${name}...`, 'info');
+    }
+
+    // ==================== INICIALIZAÇÃO ====================
+    function initApp() {
+        // Aplicar máscaras sem jQuery
+        const phoneInputs = [
+            elements.buyPhone,
+            elements.quickReservePhone,
+            elements.editClientPhone
+        ];
+        phoneInputs.forEach(input => {
+            if (input) applyPhoneMask(input);
+        });
+
+        // Filtros
+        if (elements.filterAllBtn) {
             elements.filterAllBtn.addEventListener('click', () => filterNumbersByStatus('all'));
             elements.filterAvailableBtn.addEventListener('click', () => filterNumbersByStatus('available'));
             elements.filterReservedBtn.addEventListener('click', () => filterNumbersByStatus('reserved'));
             elements.filterPaidBtn.addEventListener('click', () => filterNumbersByStatus('paid'));
+        }
 
-            // Buscas
+        // Buscas
+        if (elements.searchPhoneBtn) {
             elements.searchPhoneBtn.addEventListener('click', searchByPhone);
             elements.phoneSearchInput.addEventListener('keypress', e => { if (e.key === 'Enter') searchByPhone(); });
             elements.searchNameBtn.addEventListener('click', searchByName);
             elements.nameSearchInput.addEventListener('keypress', e => { if (e.key === 'Enter') searchByName(); });
+        }
 
-            // Busca de detentor (sorteio)
+        // Busca de detentor (sorteio)
+        if (elements.winnerSearchBtn) {
             elements.winnerSearchBtn.addEventListener('click', searchWinner);
             elements.winnerSearchInput.addEventListener('keypress', e => { if (e.key === 'Enter') searchWinner(); });
+        }
 
-            // Reserva rápida WhatsApp
+        // Reserva rápida WhatsApp
+        if (elements.extractDataBtn) {
             elements.extractDataBtn.addEventListener('click', extractDataFromText);
             elements.quickReserveBtn.addEventListener('click', quickReserveWhatsApp);
+        }
 
-            // Reserva rápida com seleção
+        // Reserva rápida com seleção
+        if (elements.quickClearSelection) {
             elements.quickClearSelection.addEventListener('click', () => {
                 selectedQuickNumbers.clear();
                 renderQuickNumberGrid();
                 updateQuickSelectedCount();
             });
             elements.quickReserveSelected.addEventListener('click', quickReserveSelected);
+        }
 
-            // Edição de cliente
+        // Edição de cliente
+        if (elements.editClientNameBtn) {
             elements.editClientNameBtn.addEventListener('click', () => openEditClientModal('name'));
             elements.editClientPhoneBtn.addEventListener('click', () => openEditClientModal('phone'));
             elements.saveClientEdit.addEventListener('click', saveClientEdit);
             elements.cancelClientEdit.addEventListener('click', () => {
                 elements.editClientModal.style.display = 'none';
             });
+        }
 
-            // Fechar modais
-            elements.editClientModal.querySelector('.close').addEventListener('click', function() {
+        // Fechar modais
+        const editClientClose = elements.editClientModal?.querySelector('.close');
+        if (editClientClose) {
+            editClientClose.addEventListener('click', function() {
                 elements.editClientModal.style.display = 'none';
             });
-            elements.filterModal.querySelector('.close').addEventListener('click', function() {
+        }
+        
+        const filterClose = elements.filterModal?.querySelector('.close');
+        if (filterClose) {
+            filterClose.addEventListener('click', function() {
                 elements.filterModal.style.display = 'none';
             });
-            window.addEventListener('click', function(e) {
-                if (e.target === elements.editClientModal) {
-                    elements.editClientModal.style.display = 'none';
-                }
-                if (e.target === elements.filterModal) {
-                    elements.filterModal.style.display = 'none';
-                }
-            });
+        }
 
-            // Copy transaction details
+        window.addEventListener('click', function(e) {
+            if (e.target === elements.editClientModal) {
+                elements.editClientModal.style.display = 'none';
+            }
+            if (e.target === elements.filterModal) {
+                elements.filterModal.style.display = 'none';
+            }
+        });
+
+        // Copy transaction details
+        if (elements.copyTransactionDetailsBtn) {
             elements.copyTransactionDetailsBtn.addEventListener('click', copyTransactionDetails);
+        }
 
-            // Contato no admin modal
+        // Contato no admin modal
+        if (elements.adminContactBtn) {
             elements.adminContactBtn.addEventListener('click', function() {
                 const phone = elements.adminPhone.textContent;
                 if (phone && phone !== 'N/A') {
@@ -2045,682 +2695,105 @@ const message = encodeURIComponent(
                     showToast('⚠️ Telefone não disponível.', 'error');
                 }
             });
+        }
 
-            database.ref('.info/connected').on('value', snap => {
-                isConnected = snap.val() === true;
+        // Conexão com Firebase
+        database.ref('.info/connected').on('value', snap => {
+            isConnected = snap.val() === true;
+            if (elements.connectionStatus) {
                 elements.connectionStatus.style.display = isConnected ? 'none' : 'block';
-                if (isConnected) {
-                    loadNumbers();
-                }
-            });
+            }
+            if (isConnected) {
+                loadNumbers();
+            }
+        });
 
-            auth.onAuthStateChanged(user => {
-                const authorized = user && user.uid === "0kVyR8O6Wedq881t6EZJOu528Fw1";
-                isAdmin = authorized;
-                if (authorized) {
-                    elements.adminPanel.style.display = 'block';
+        // Autenticação
+        auth.onAuthStateChanged(user => {
+            const authorized = user && user.uid === "0kVyR8O6Wedq881t6EZJOu528Fw1";
+            isAdmin = authorized;
+            if (authorized) {
+                if (elements.adminPanel) elements.adminPanel.style.display = 'block';
+                if (elements.loginBtn) {
                     elements.loginBtn.textContent = '✅ Admin Logado';
                     elements.loginBtn.disabled = true;
-                    elements.showAllNumbersBtn.style.display = 'inline-block';
-                } else {
-                    elements.adminPanel.style.display = 'none';
+                }
+                if (elements.showAllNumbersBtn) elements.showAllNumbersBtn.style.display = 'inline-block';
+            } else {
+                if (elements.adminPanel) elements.adminPanel.style.display = 'none';
+                if (elements.loginBtn) {
                     elements.loginBtn.textContent = '🔑 Login Admin';
                     elements.loginBtn.disabled = false;
-                    elements.transactionResult.style.display = 'none';
-                    elements.showAllNumbersBtn.style.display = 'none';
                 }
-                if (isConnected) loadNumbers();
-            });
+                if (elements.transactionResult) elements.transactionResult.style.display = 'none';
+                if (elements.showAllNumbersBtn) elements.showAllNumbersBtn.style.display = 'none';
+            }
+            if (isConnected) loadNumbers();
+        });
 
-            elements.buyBtn.addEventListener('click', openBuyModal);
-            elements.confirmBuyBtn.addEventListener('click', confirmPurchase);
-            elements.loginBtn.addEventListener('click', openLoginModal);
-            elements.confirmLoginBtn.addEventListener('click', loginAdmin);
-            elements.logoutBtn.addEventListener('click', logoutAdmin);
-            elements.contactBtn.addEventListener('click', toggleContact);
-            elements.searchTransactionBtn.addEventListener('click', searchTransaction);
-            elements.markTransactionPaid.addEventListener('click', markTransactionPaid);
-            elements.cancelTransaction.addEventListener('click', cancelTransaction);
-            elements.initBtn.addEventListener('click', initializeRaffleNumbers);
-            elements.showAllNumbersBtn.addEventListener('click', showAllNumbers);
-            elements.showParticipantsBtn.addEventListener('click', showParticipants);
+        // Event listeners principais
+        if (elements.buyBtn) elements.buyBtn.addEventListener('click', openBuyModal);
+        if (elements.confirmBuyBtn) elements.confirmBuyBtn.addEventListener('click', confirmPurchase);
+        if (elements.loginBtn) elements.loginBtn.addEventListener('click', openLoginModal);
+        if (elements.confirmLoginBtn) elements.confirmLoginBtn.addEventListener('click', loginAdmin);
+        if (elements.logoutBtn) elements.logoutBtn.addEventListener('click', logoutAdmin);
+        if (elements.contactBtn) elements.contactBtn.addEventListener('click', toggleContact);
+        if (elements.searchTransactionBtn) elements.searchTransactionBtn.addEventListener('click', searchTransaction);
+        if (elements.markTransactionPaid) elements.markTransactionPaid.addEventListener('click', markTransactionPaid);
+        if (elements.cancelTransaction) elements.cancelTransaction.addEventListener('click', cancelTransaction);
+        if (elements.initBtn) elements.initBtn.addEventListener('click', initializeRaffleNumbers);
+        if (elements.showAllNumbersBtn) elements.showAllNumbersBtn.addEventListener('click', showAllNumbers);
+        if (elements.showParticipantsBtn) elements.showParticipantsBtn.addEventListener('click', showParticipants);
 
+        if (elements.buyQuantity) {
             elements.buyQuantity.addEventListener('change', updateBuyTotal);
-            document.querySelectorAll('.close').forEach(el => {
-                el.addEventListener('click', function() {
-                    const modal = this.closest('.modal');
-                    if (modal) modal.style.display = 'none';
-                });
+        }
+
+        // Fechar modais com o X
+        document.querySelectorAll('.modal .close').forEach(el => {
+            el.addEventListener('click', function() {
+                const modal = this.closest('.modal');
+                if (modal) modal.style.display = 'none';
             });
-            window.addEventListener('click', e => {
-                if (e.target.classList.contains('modal')) e.target.style.display = 'none';
-            });
-            document.addEventListener('keydown', e => {
-                if (e.key === 'Enter') {
-                    if (elements.loginModal.style.display === 'block') loginAdmin();
-                }
-            });
+        });
+
+        window.addEventListener('click', e => {
+            if (e.target.classList.contains('modal')) e.target.style.display = 'none';
+        });
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'Enter' && elements.loginModal?.style?.display === 'block') {
+                loginAdmin();
+            }
+        });
+
+        if (elements.transactionSearchInput) {
             elements.transactionSearchInput.addEventListener('keypress', e => {
                 if (e.key === 'Enter') searchTransaction();
             });
-
-            if (isConnected) loadNumbers();
         }
 
-        function toggleContact() {
-            elements.contactInfo.style.display = elements.contactInfo.style.display === 'block' ? 'none' : 'block';
+        // Carregar dados se já estiver conectado
+        if (isConnected) loadNumbers();
+
+        // Botão de contatar inadimplentes
+        const contactAllBtn = document.getElementById('contact-all-overdue-btn');
+        if (contactAllBtn) {
+            contactAllBtn.addEventListener('click', contactAllOverdue);
         }
 
-        function initializeRaffleNumbers() {
-            if (!confirm('Deseja inicializar os 1000 números? Isso irá resetar todos os dados existentes.')) return;
-
-            elements.initBtn.disabled = true;
-            elements.initBtn.textContent = '⏳ Processando...';
-
-            const numbers = {};
-            for (let i = 0; i < TOTAL_NUMBERS; i++) {
-                numbers[i] = { status: 'available' };
-            }
-
-            database.ref('raffleNumbers').set(numbers)
-                .then(() => {
-                    showToast('✅ 1000 números inicializados com sucesso!', 'success');
-                    loadNumbers();
-                })
-                .catch(err => {
-                    console.error(err);
-                    showToast('❌ Erro ao inicializar: ' + err.message, 'error');
-                })
-                .finally(() => {
-                    elements.initBtn.disabled = false;
-                    elements.initBtn.textContent = '📦 Inicializar 1000 números';
-                });
-        }
-
-        function loadNumbers() {
-            database.ref('raffleNumbers').once('value')
-                .then(snapshot => {
-                    if (!snapshot.exists()) {
-                        elements.initBtn.style.display = 'inline-block';
-                        elements.availableCount.textContent = '0';
-                        elements.reservedCount.textContent = '0';
-                        elements.paidCount.textContent = '0';
-                        elements.buyBtn.disabled = true;
-                        showToast('📦 Nenhum número encontrado. Clique em "Inicializar 1000 números" para começar.', '');
-                        return;
-                    }
-                    elements.initBtn.style.display = 'none';
-                    numbersData = snapshot.val();
-                    updateCounters(numbersData);
-                    updateStats(numbersData);
-                    renderQuickNumberGrid();
-
-                    if (currentFilter && numbersData) {
-                        const filtered = [];
-                        for (let i = 0; i < TOTAL_NUMBERS; i++) {
-                            const data = numbersData[i] || { status: 'available' };
-                            if (currentFilter === 'all' || data.status === currentFilter) {
-                                filtered.push({ number: i, ...data });
-                            }
-                        }
-                        elements.filterTotalCount.textContent = filtered.length;
-                    }
-                })
-                .catch(err => {
-                    console.error('Erro ao carregar números:', err);
-                    showToast('❌ Erro ao carregar dados: ' + err.message, 'error');
-                });
-        }
-
-        function updateCounters(data) {
-            let available = 0, reserved = 0, paid = 0;
-            for (let i = 0; i < TOTAL_NUMBERS; i++) {
-                const status = data[i]?.status || 'available';
-                if (status === 'available') available++;
-                else if (status === 'reserved') reserved++;
-                else if (status === 'paid') paid++;
-            }
-            elements.availableCount.textContent = available;
-            elements.reservedCount.textContent = reserved;
-            elements.paidCount.textContent = paid;
-            elements.buyBtn.disabled = isProcessing || available === 0;
-        }
-
-        function showAllNumbers() {
-            if (!isAdmin || !numbersData) return;
-
-            const grid = elements.allNumbersGrid;
-            grid.innerHTML = '';
-
-            for (let i = 0; i < TOTAL_NUMBERS; i++) {
-                const data = numbersData[i] || { status: 'available' };
-                const div = document.createElement('div');
-                div.style.cssText = `
-                    padding: 6px 2px;
-                    text-align: center;
-                    font-size: 0.7rem;
-                    border-radius: 4px;
-                    font-weight: bold;
-                    cursor: pointer;
-                    background: ${data.status === 'available' ? '#2e7d32' : data.status === 'reserved' ? '#e65100' : '#1a237e'};
-                    color: white;
-                    border: 1px solid ${data.status === 'available' ? '#1b5e20' : data.status === 'reserved' ? '#bf360c' : '#0d1445'};
-                `;
-                div.textContent = formatNumber(i);
-                div.title = `Nº ${formatNumber(i)} - ${getStatusText(data.status)}`;
-                div.onclick = () => {
-                    handleNumberClick(i, data.status, data.user, data.transactionId);
-                    elements.allNumbersModal.style.display = 'none';
-                };
-                grid.appendChild(div);
-            }
-
-            elements.allNumbersModal.style.display = 'block';
-        }
-
-        function handleNumberClick(number, status, user, txId) {
-            if (!isAdmin) return;
-
-            currentAdminNumber = number;
-            elements.adminNumber.textContent = formatNumber(number);
-            elements.adminStatus.textContent = getStatusText(status);
-
-            if (status === 'reserved' || status === 'paid') {
-                elements.adminUserInfo.style.display = 'block';
-                elements.adminName.textContent = user?.name || 'N/A';
-                elements.adminPhone.textContent = user?.phone || 'N/A';
-                elements.adminTransactionId.textContent = txId || 'N/A';
-                elements.adminContactBtn.style.display = (user?.phone && user.phone !== 'N/A') ? 'inline-block' : 'none';
-            } else {
-                elements.adminUserInfo.style.display = 'none';
-            }
-
-            elements.markPaidBtn.style.display = status === 'reserved' ? 'inline-block' : 'none';
-            elements.removeReservationBtn.style.display = (status === 'reserved' || status === 'paid') ? 'inline-block' : 'none';
-            elements.removeReservationBtn.textContent = status === 'paid' ? 'Cancelar Compra' : 'Remover Reserva';
-            elements.markPaidBtn.onclick = () => markNumberPaid(number);
-            elements.removeReservationBtn.onclick = () => removeReservation(number);
-            elements.adminModal.style.display = 'block';
-        }
-
-        function openBuyModal() {
-            if (isProcessing) return;
-
-            database.ref('raffleNumbers').once('value').then(snap => {
-                const data = snap.val();
-                if (!data) {
-                    showToast('📦 Nenhum número disponível. Inicialize a rifa primeiro.', 'error');
-                    return;
-                }
-
-                let available = 0;
-                for (let i = 0; i < TOTAL_NUMBERS; i++) {
-                    if (data[i] && data[i].status === 'available') available++;
-                }
-                if (available === 0) {
-                    showToast('⚠️ Todos os números já foram vendidos!', 'error');
-                    return;
-                }
-
-                const maxQ = Math.min(10, available);
-                elements.buyQuantity.innerHTML = '';
-                for (let q = 1; q <= maxQ; q++) {
-                    const opt = document.createElement('option');
-                    opt.value = q;
-                    opt.textContent = q;
-                    elements.buyQuantity.appendChild(opt);
-                }
-                updateBuyTotal();
-                elements.buyModal.style.display = 'block';
-                elements.buyName.value = '';
-                elements.buyPhone.value = '';
-                setTimeout(() => elements.buyName.focus(), 100);
-            });
-        }
-
-        function updateBuyTotal() {
-            const qty = parseInt(elements.buyQuantity.value) || 1;
-            elements.buyTotal.textContent = qty * 10;
-        }
-
-        function confirmPurchase() {
-            if (isProcessing) return;
-
-            const name = elements.buyName.value.trim();
-            const phone = elements.buyPhone.value.trim();
-            const qty = parseInt(elements.buyQuantity.value) || 1;
-
-            if (!name || !phone) {
-                showToast('⚠️ Preencha todos os campos.', 'error');
-                return;
-            }
-            const phoneDigits = phone.replace(/\D/g, '');
-            if (phoneDigits.length < 11) {
-                showToast('⚠️ Telefone inválido. Use DDD e número.', 'error');
-                return;
-            }
-
-            const msg = `Oi, quero participar da rifa! Separe ${qty} número(s) pra mim!\n${name}\n${phone}`;
-
-            elements.buyModal.style.display = 'none';
-            window.open(`https://wa.me/5512997473756?text=${encodeURIComponent(msg)}`, '_blank');
-
-            showToast('📱 Se o WhatsApp não abrir automaticamente, entre em contato com (12) 99747-3756 para finalizar seu pedido.', 'info');
-}
-
-        function searchTransaction() {
-            const id = elements.transactionSearchInput.value.trim();
-            if (!id) { showToast('⚠️ Digite um ID de transação.', 'error'); return; }
-
-            elements.transactionResult.style.display = 'none';
-            elements.transactionActionMessage.style.display = 'none';
-
-            database.ref(`transactions/${id}`).once('value').then(snap => {
-                if (!snap.exists()) {
-                    showToast('❌ Transação não encontrada.', 'error');
-                    return;
-                }
-                const data = snap.val();
-                currentTransactionId = id;
-                elements.resultTransactionId.textContent = data.id;
-                elements.resultClientNameDisplay.textContent = data.user.name;
-                elements.resultClientPhoneDisplay.textContent = data.user.phone;
-                elements.resultDate.textContent = new Date(data.timestamp).toLocaleString('pt-BR');
-                elements.resultTotalValue.textContent = data.total.toFixed(2);
-                elements.resultNumbers.innerHTML = '';
-                data.numbers.forEach(num => {
-                    const span = document.createElement('span');
-                    span.className = 'transaction-number';
-                    span.textContent = formatNumber(num);
-                    elements.resultNumbers.appendChild(span);
-                });
-                elements.transactionResult.style.display = 'block';
-                elements.transactionActionMessage.style.display = 'none';
-                const isPaid = data.status === 'paid';
-                elements.markTransactionPaid.style.display = isPaid ? 'none' : 'inline-block';
-                elements.markTransactionPaid.textContent = isPaid ? '✅ Já Pago' : '✅ Marcar Todos como Pago';
-                if (isPaid) {
-                    elements.transactionActionMessage.className = 'success-message';
-                    elements.transactionActionMessage.textContent = '✅ Esta transação já foi paga.';
-                    elements.transactionActionMessage.style.display = 'block';
-                }
-                showToast('✅ Transação encontrada!', 'success');
-            }).catch(err => {
-                console.error(err);
-                showToast('❌ Erro ao buscar transação.', 'error');
-            });
-        }
-
-        function copyTransactionDetails() {
-            if (!currentTransactionId) {
-                showToast('⚠️ Nenhuma transação carregada para copiar.', 'error');
-                return;
-            }
-
-            const id = elements.resultTransactionId.textContent;
-            const name = elements.resultClientNameDisplay.textContent;
-            const phone = elements.resultClientPhoneDisplay.textContent;
-            const date = elements.resultDate.textContent;
-            const total = elements.resultTotalValue.textContent;
-
-            const numberElements = elements.resultNumbers.querySelectorAll('.transaction-number');
-            const numbers = Array.from(numberElements).map(el => el.textContent).join(', ');
-
-            const message = `✅ *TRANSACÃO CONFIRMADA* ✅\n\n` +
-                            `🆔 *ID:* ${id}\n` +
-                            `👤 *Comprador:* ${name}\n` +
-                            `📱 *Telefone:* ${phone}\n` +
-                            `📅 *Data:* ${date}\n` +
-                            `💰 *Valor:* R$ ${total}\n` +
-                            `🔢 *Bilhete(s):* ${numbers}\n\n` +
-                            `📌 *Status:* Aguardando pagamento\n` +
-                            `💳 *PIX:* (12) 99747-3756`;
-
-            navigator.clipboard.writeText(message).then(() => {
-                showToast('✅ Dados da transação copiados! Cole no WhatsApp.', 'success');
-            }).catch(err => {
-                console.error('Erro ao copiar:', err);
-                const textarea = document.createElement('textarea');
-                textarea.value = message;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                showToast('✅ Dados copiados! Cole no WhatsApp.', 'success');
-            });
-        }
-
-        function markTransactionPaid() {
-            if (!currentTransactionId) return;
-            if (!confirm(`Marcar transação ${currentTransactionId} como paga?`)) return;
-
-            elements.markTransactionPaid.disabled = true;
-            elements.markTransactionPaid.textContent = '⏳ ...';
-
-            database.ref(`transactions/${currentTransactionId}`).once('value').then(snap => {
-                if (!snap.exists()) { showToast('Transação não encontrada.', 'error'); return; }
-                const data = snap.val();
-                if (data.status === 'paid') { showToast('Já paga.', 'error'); return; }
-                const updates = {};
-                data.numbers.forEach(num => { updates[`raffleNumbers/${num}/status`] = 'paid'; });
-                updates[`transactions/${currentTransactionId}/status`] = 'paid';
-                return database.ref().update(updates);
-            }).then(() => {
-                elements.transactionActionMessage.className = 'success-message';
-                elements.transactionActionMessage.textContent = '✅ Pagamento confirmado!';
-                elements.transactionActionMessage.style.display = 'block';
-                elements.markTransactionPaid.style.display = 'none';
-                showToast('✅ Pagamento confirmado com sucesso!', 'success');
-                loadNumbers();
-            }).catch(err => {
-                console.error(err);
-                showToast('❌ Erro: ' + err.message, 'error');
-            }).finally(() => {
-                elements.markTransactionPaid.disabled = false;
-                elements.markTransactionPaid.textContent = '✅ Marcar Todos como Pago';
-            });
-        }
-
-        function cancelTransaction() {
-            if (!currentTransactionId) return;
-            if (!confirm(`Cancelar transação ${currentTransactionId}?`)) return;
-
-            elements.cancelTransaction.disabled = true;
-            elements.cancelTransaction.textContent = '⏳ ...';
-
-            database.ref(`transactions/${currentTransactionId}`).once('value').then(snap => {
-                if (!snap.exists()) { showToast('Transação não encontrada.', 'error'); return; }
-                const data = snap.val();
-                const updates = {};
-                data.numbers.forEach(num => { updates[`raffleNumbers/${num}`] = { status: 'available' }; });
-                updates[`transactions/${currentTransactionId}`] = null;
-                return database.ref().update(updates);
-            }).then(() => {
-                elements.transactionActionMessage.className = 'success-message';
-                elements.transactionActionMessage.textContent = '✅ Transação cancelada.';
-                elements.transactionActionMessage.style.display = 'block';
-                elements.transactionResult.style.display = 'none';
-                elements.transactionSearchInput.value = '';
-                currentTransactionId = null;
-                showToast('✅ Transação cancelada com sucesso!', 'success');
-                loadNumbers();
-            }).catch(err => {
-                console.error(err);
-                showToast('❌ Erro: ' + err.message, 'error');
-            }).finally(() => {
-                elements.cancelTransaction.disabled = false;
-                elements.cancelTransaction.textContent = '❌ Cancelar Transação';
-            });
-        }
-
-        function markNumberPaid(number) {
-            if (!confirm(`Marcar ${formatNumber(number)} como pago?`)) return;
-
-            database.ref(`raffleNumbers/${number}`).once('value').then(snap => {
-                const data = snap.val();
-                if (data.transactionId) {
-                    return database.ref(`transactions/${data.transactionId}/status`).set('paid')
-                        .then(() => database.ref(`raffleNumbers/${number}/status`).set('paid'));
-                }
-                return database.ref(`raffleNumbers/${number}/status`).set('paid');
-            }).then(() => {
-                elements.adminModal.style.display = 'none';
-                showToast(`✅ Número ${formatNumber(number)} pago.`, 'success');
-                loadNumbers();
-            }).catch(err => {
-                showToast('❌ Erro: ' + err.message, 'error');
-            });
-        }
-
-        function removeReservation(number) {
-            const action = elements.removeReservationBtn.textContent;
-            if (!confirm(`${action} do número ${formatNumber(number)}?`)) return;
-
-            database.ref(`raffleNumbers/${number}`).once('value').then(snap => {
-                const data = snap.val();
-                if (data.transactionId) {
-                    return database.ref(`transactions/${data.transactionId}`).once('value').then(txSnap => {
-                        if (txSnap.exists()) {
-                            const txData = txSnap.val();
-                            const updated = txData.numbers.filter(n => n !== number);
-                            if (updated.length === 0) {
-                                return database.ref(`transactions/${data.transactionId}`).remove()
-                                    .then(() => database.ref(`raffleNumbers/${number}`).set({ status: 'available' }));
-                            } else {
-                                return database.ref(`transactions/${data.transactionId}/numbers`).set(updated)
-                                    .then(() => database.ref(`raffleNumbers/${number}`).set({ status: 'available' }));
-                            }
-                        }
-                        return database.ref(`raffleNumbers/${number}`).set({ status: 'available' });
-                    });
-                }
-                return database.ref(`raffleNumbers/${number}`).set({ status: 'available' });
-            }).then(() => {
-                elements.adminModal.style.display = 'none';
-                showToast(`✅ ${action} realizada.`, 'success');
-                loadNumbers();
-            }).catch(err => {
-                showToast('❌ Erro: ' + err.message, 'error');
-            });
-        }
-
-        function showParticipants() {
-            const tbody = elements.participantsTableBody;
-            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:#888;">Carregando...</td></tr>';
-            elements.participantsModal.style.display = 'block';
-
-            database.ref('raffleNumbers').once('value').then(snap => {
-                const data = snap.val();
-                if (!data) {
-                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Nenhum participante ainda.</td></tr>';
-                    return;
-                }
-
-                const paidNumbers = [];
-                for (let i = 0; i < TOTAL_NUMBERS; i++) {
-                    if (data[i] && data[i].status === 'paid' && data[i].user) {
-                        paidNumbers.push({
-                            number: i,
-                            name: data[i].user.name || 'Desconhecido',
-                            phone: data[i].user.phone || ''
-                        });
-                    }
-                }
-
-                if (paidNumbers.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="3" style="text-align:center;">Nenhum participante ainda.</td></tr>';
-                    return;
-                }
-
-                paidNumbers.sort((a, b) => a.number - b.number);
-
-                let html = '';
-                for (const p of paidNumbers) {
-                    let displayPhone = p.phone;
-                    if (displayPhone.length >= 8) {
-                        const digits = displayPhone.replace(/\D/g, '');
-                        if (digits.length >= 8) {
-                            const last4 = digits.slice(-4);
-                            const firstPart = digits.slice(0, digits.length - 4);
-                            const hidden = firstPart.slice(0, 2) + 'XXXXX' + last4;
-                            if (displayPhone.includes('(')) {
-                                const ddd = digits.slice(0, 2);
-                                displayPhone = `(${ddd}) ${hidden.slice(2)}`;
-                            } else {
-                                displayPhone = hidden;
-                            }
-                        }
-                    }
-                    const nameParts = p.name.split(' ');
-                    let shortName = nameParts[0];
-                    if (nameParts.length > 1) {
-                        shortName += ' ' + nameParts[nameParts.length - 1];
-                    }
-                    html += `<tr><td>${formatNumber(p.number)}</td><td>${shortName}</td><td>${displayPhone}</td></tr>`;
-                }
-                tbody.innerHTML = html;
-            }).catch(err => {
-                console.error(err);
-                tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; color:red;">Erro ao carregar participantes.</td></tr>';
-            });
-        }
-
-        function openLoginModal() {
-            if (isAdmin) return;
-            elements.loginModal.style.display = 'block';
-            elements.loginError.style.display = 'none';
-            elements.emailInput.value = '';
-            elements.passwordInput.value = '';
-            setTimeout(() => elements.emailInput.focus(), 100);
-        }
-
-        function loginAdmin() {
-            const email = elements.emailInput.value.trim();
-            const pass = elements.passwordInput.value.trim();
-            if (!email || !pass) {
-                elements.loginError.textContent = '❌ Preencha todos os campos.';
-                elements.loginError.style.display = 'block';
-                return;
-            }
-            elements.confirmLoginBtn.disabled = true;
-            elements.confirmLoginBtn.textContent = '⏳ ...';
-
-            auth.signInWithEmailAndPassword(email, pass).then(cred => {
-                if (cred.user.uid === "0kVyR8O6Wedq881t6EZJOu528Fw1") {
-                    elements.loginModal.style.display = 'none';
-                    isAdmin = true;
-                    elements.adminPanel.style.display = 'block';
-                    elements.loginBtn.textContent = '✅ Admin Logado';
-                    elements.loginBtn.disabled = true;
-                    elements.showAllNumbersBtn.style.display = 'inline-block';
-                    loadNumbers();
-                } else {
-                    throw new Error('Acesso não autorizado');
-                }
-            }).catch(err => {
-                console.error(err);
-                elements.loginError.textContent = '❌ Email ou senha incorretos.';
-                elements.loginError.style.display = 'block';
-            }).finally(() => {
-                elements.confirmLoginBtn.disabled = false;
-                elements.confirmLoginBtn.textContent = 'Entrar';
-            });
-        }
-
-        function logoutAdmin() {
-            auth.signOut().then(() => {
-                isAdmin = false;
-                elements.adminPanel.style.display = 'none';
-                elements.loginBtn.textContent = '🔑 Login Admin';
-                elements.loginBtn.disabled = false;
-                elements.transactionResult.style.display = 'none';
-                elements.transactionSearchInput.value = '';
-                elements.showAllNumbersBtn.style.display = 'none';
-                currentTransactionId = null;
-                loadNumbers();
-            }).catch(console.error);
-        }
-
-// Função para contatar todos os inadimplentes
-async function contactAllOverdue() {
-    if (!isAdmin) {
-        showToast('⚠️ Faça login como admin primeiro.', 'error');
-        return;
-    }
-    
-    if (!numbersData) {
-        showToast('⚠️ Carregando dados...', 'error');
-        return;
+        // Configurar função global para handleNumberClick
+        window.handleNumberClick = handleNumberClick;
     }
 
-    const now = Date.now();
-    const dayInMs = 24 * 60 * 60 * 1000;
-    const overdue = [];
-
-    for (let i = 0; i < TOTAL_NUMBERS; i++) {
-        const item = numbersData[i];
-        if (item && item.status === 'reserved' && item.timestamp && (now - item.timestamp) > dayInMs) {
-            if (item.user?.phone) {
-                overdue.push({
-                    number: i,
-                    name: item.user.name || 'Desconhecido',
-                    phone: item.user.phone
-                });
-            }
-        }
-    }
-
-    if (overdue.length === 0) {
-        showToast('✅ Nenhum inadimplente encontrado!', 'success');
-        return;
-    }
-
-    // Mostra lista de confirmacao
-    let confirmMsg = `📋 Inadimplentes (${overdue.length}):\n\n`;
-    overdue.forEach((item, index) => {
-        confirmMsg += `${index + 1}. #${formatNumber(item.number)} - ${item.name} (${item.phone})\n`;
-    });
-    confirmMsg += `\nDeseja abrir o WhatsApp para contatar todos?`;
-
-    if (!confirm(confirmMsg)) return;
-
-    // Abre cada contato em uma nova aba (com delay para não sobrecarregar)
-    let opened = 0;
-    for (const item of overdue) {
-        const phoneClean = item.phone.replace(/\D/g, '');
-        if (phoneClean.length >= 10) {
-            const numbersStr = formatNumber(item.number);
-const message = encodeURIComponent(
-    `Oi, sua reserva está perto de expirar. ` +
-    `Assim que possível me envie o comprovante do pagamento para não perder ` +
-    `os números selecionados anteriormente. Obrigada!!`
-);
-            const url = `https://wa.me/55${phoneClean}?text=${message}`;
-            
-            // Abre em nova aba com delay de 1 segundo entre cada
-            setTimeout(() => {
-                window.open(url, '_blank');
-            }, opened * 1000);
-            opened++;
-        }
-    }
-    
-    showToast(`📱 Abrindo ${opened} conversas no WhatsApp...`, 'info');
-}
-
-// Event listener para o botão
-document.addEventListener('DOMContentLoaded', function() {
-    const contactAllBtn = document.getElementById('contact-all-overdue-btn');
-    if (contactAllBtn) {
-        contactAllBtn.addEventListener('click', contactAllOverdue);
-    }
-});
-
-// Função para contatar um inadimplente específico
-function contactOverdue(number, name, phone) {
-    if (!isAdmin) {
-        showToast('⚠️ Faça login como admin primeiro.', 'error');
-        return;
-    }
-    
-    const phoneClean = phone.replace(/\D/g, '');
-    if (phoneClean.length < 10) {
-        showToast('⚠️ Telefone inválido.', 'error');
-        return;
-    }
-    
-    const numbersStr = formatNumber(number);
-    const message = encodeURIComponent(
-        `Oi, sua reserva do número ${numbersStr} está perto de expirar. ` +
-        `Assim que possível me envie o comprovante do pagamento para não perder ` +
-        `os números selecionados anteriormente. Obrigada!!`
-    );
-    
-    window.open(`https://wa.me/55${phoneClean}?text=${message}`, '_blank');
-    showToast(`📱 Abrindo WhatsApp para ${name}...`, 'info');
-}
-
+    // ==================== INICIALIZAR ====================
+    // Usa DOMContentLoaded em vez de $(document).ready()
+    if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', initApp);
-    </script>
+    } else {
+        // DOM já está carregado
+        initApp();
+    }
+</script>
 </body>
 </html>
