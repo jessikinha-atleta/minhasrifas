@@ -1256,6 +1256,44 @@
             }
         }
 
+// Gera link do WhatsApp com mensagem de cobrança dos números reservados da transação
+function gerarLinkCobranca(transactionId, phoneFallback) {
+    return new Promise((resolve) => {
+        const abrir = (phone, numeros) => {
+            const digits = (phone || '').replace(/\D/g, '');
+            if (digits.length < 10) {
+                showToast('⚠️ Telefone não disponível.', 'error');
+                return resolve(null);
+            }
+            const lista = numeros.map(n => formatNumber(n)).join(', ');
+            const msg = `Olá! Verifiquei que os números ${lista} ainda não foram pagos.\n` +
+                        `Não esqueça de me enviar o comprovante para que eu possa dar baixa neles.\n` +
+                        `Obrigada!!`;
+            const url = `https://wa.me/55${digits}?text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+            resolve(url);
+        };
+
+        if (!transactionId) {
+            // Sem transação: usa só o número atual (fallback)
+            return abrir(phoneFallback, [currentAdminNumber ?? '']);
+        }
+
+        database.ref(`transactions/${transactionId}`).once('value').then(snap => {
+            if (!snap.exists()) {
+                return abrir(phoneFallback, [currentAdminNumber ?? '']);
+            }
+            const tx = snap.val();
+            const numerosReservados = (tx.numbers || []).filter(n => {
+                const item = numbersData?.[n];
+                return item && item.status === 'reserved';
+            });
+            const lista = numerosReservados.length > 0 ? numerosReservados : (tx.numbers || []);
+            abrir(tx.user?.phone || phoneFallback, lista);
+        }).catch(() => abrir(phoneFallback, [currentAdminNumber ?? '']));
+    });
+}
+
         // ==================== BUSCA POR DETENTOR (SORTEIO) ====================
 
         function searchWinner() {
@@ -1293,14 +1331,9 @@
                 elements.winnerName.textContent = data.user.name || 'N/A';
                 elements.winnerPhone.textContent = data.user.phone || 'N/A';
                 elements.winnerTransaction.textContent = data.transactionId || 'N/A';
-                elements.winnerContactBtn.onclick = () => {
-                    const phone = data.user.phone.replace(/\D/g, '');
-                    if (phone.length >= 10) {
-                        window.open(`https://wa.me/55${phone}?text=Olá! Vi que você está com o número ${formatNumber(number)} da rifa.`, '_blank');
-                    } else {
-                        showToast('⚠️ Telefone não disponível.', 'error');
-                    }
-                };
+elements.winnerContactBtn.onclick = () => {
+    gerarLinkCobranca(data.transactionId, data.user.phone);
+};
             } else {
                 userInfo.style.display = 'none';
             }
@@ -2009,19 +2042,12 @@
             elements.copyTransactionDetailsBtn.addEventListener('click', copyTransactionDetails);
 
             // Contato no admin modal
-            elements.adminContactBtn.addEventListener('click', function() {
-                const phone = elements.adminPhone.textContent;
-                if (phone && phone !== 'N/A') {
-                    const digits = phone.replace(/\D/g, '');
-                    if (digits.length >= 10) {
-                        window.open(`https://wa.me/55${digits}?text=Olá! Vi que você está com o número ${elements.adminNumber.textContent} da rifa.`, '_blank');
-                    } else {
-                        showToast('⚠️ Telefone não disponível.', 'error');
-                    }
-                } else {
-                    showToast('⚠️ Telefone não disponível.', 'error');
-                }
-            });
+elements.adminContactBtn.addEventListener('click', function() {
+    const phone = elements.adminPhone.textContent;
+    const txId = elements.adminTransactionId.textContent;
+    const txIdValido = (txId && txId !== 'N/A') ? txId : null;
+    gerarLinkCobranca(txIdValido, phone);
+});
 
             database.ref('.info/connected').on('value', snap => {
                 isConnected = snap.val() === true;
