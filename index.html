@@ -868,11 +868,12 @@
             </div>
             <p><strong>🔢 Números:</strong></p>
             <div class="transaction-numbers" id="result-numbers"></div>
-            <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
-                <button id="mark-transaction-paid" class="btn btn-success">✅ Marcar Todos como Pago</button>
-                <button id="cancel-transaction" class="btn btn-danger">❌ Cancelar Transação</button>
-                <button id="copy-transaction-details-btn" class="btn btn-primary">📋 Copiar Dados</button>
-            </div>
+          <div style="display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap;">
+    <button id="mark-transaction-paid" class="btn btn-success">✅ Marcar Todos como Pago</button>
+    <button id="cancel-transaction" class="btn btn-danger">❌ Cancelar Transação</button>
+    <button id="copy-transaction-details-btn" class="btn btn-primary">📋 Copiar Dados</button>
+    <button id="send-whatsapp-btn" class="btn btn-success">📲 Enviar no WhatsApp</button>
+</div>
             <div id="transaction-action-message" class="success-message"></div>
         </div>
         <button id="logout-btn" class="btn btn-danger" style="margin-top:15px;">🚪 Logout</button>
@@ -1159,6 +1160,7 @@
             editClientNameBtn: document.getElementById('edit-client-name-btn'),
             editClientPhoneBtn: document.getElementById('edit-client-phone-btn'),
             copyTransactionDetailsBtn: document.getElementById('copy-transaction-details-btn'),
+            sendWhatsappBtn: document.getElementById('send-whatsapp-btn'),
             statTotal: document.getElementById('stat-total'),
             statAvailable: document.getElementById('stat-available'),
             statReserved: document.getElementById('stat-reserved'),
@@ -2040,6 +2042,7 @@ elements.winnerContactBtn.onclick = () => {
 
             // Copy transaction details
             elements.copyTransactionDetailsBtn.addEventListener('click', copyTransactionDetails);
+            elements.sendWhatsappBtn.addEventListener('click', sendWhatsApp);
 
             // Contato no admin modal
 elements.adminContactBtn.addEventListener('click', function() {
@@ -2354,45 +2357,114 @@ elements.adminContactBtn.addEventListener('click', function() {
             });
         }
 
-        function copyTransactionDetails() {
-            if (!currentTransactionId) {
-                showToast('⚠️ Nenhuma transação carregada para copiar.', 'error');
-                return;
-            }
+function buildTransactionMessage() {
+    const id = elements.resultTransactionId.textContent;
+    const name = elements.resultClientNameDisplay.textContent;
+    const phone = elements.resultClientPhoneDisplay.textContent;
+    const date = elements.resultDate.textContent;
+    const total = elements.resultTotalValue.textContent;
 
-            const id = elements.resultTransactionId.textContent;
-            const name = elements.resultClientNameDisplay.textContent;
-            const phone = elements.resultClientPhoneDisplay.textContent;
-            const date = elements.resultDate.textContent;
-            const total = elements.resultTotalValue.textContent;
+    const numberElements = elements.resultNumbers.querySelectorAll('.transaction-number');
+    const numbers = Array.from(numberElements).map(el => el.textContent).join(', ');
 
-            const numberElements = elements.resultNumbers.querySelectorAll('.transaction-number');
-            const numbers = Array.from(numberElements).map(el => el.textContent).join(', ');
+    // Formata valor com vírgula (padrão brasileiro)
+    const totalFormatado = total.replace('.', ',');
 
-            const message = `✅ *TRANSACÃO CONFIRMADA* ✅\n\n` +
-                            `🆔 *ID:* ${id}\n` +
-                            `👤 *Comprador:* ${name}\n` +
-                            `📱 *Telefone:* ${phone}\n` +
-                            `📅 *Data:* ${date}\n` +
-                            `💰 *Valor:* R$ ${total}\n` +
-                            `🔢 *Bilhete(s):* ${numbers}\n\n` +
-                            `📌 *Status:* Aguardando pagamento\n` +
-                            `💳 *PIX:* (12) 99747-3756`;
+    // Calcula data limite (24h após a data da transação)
+    let prazoTexto = '';
+    try {
+        // Tenta parsear a data no formato pt-BR (dd/mm/aaaa, hh:mm:ss)
+        const [dataPart, horaPart] = date.split(', ');
+        const [dia, mes, ano] = dataPart.split('/').map(Number);
+        const [hora, minuto] = horaPart.split(':').map(Number);
+        const dataTx = new Date(ano, mes - 1, dia, hora, minuto);
+        const dataLimite = new Date(dataTx.getTime() + 24 * 60 * 60 * 1000);
+        prazoTexto = dataLimite.toLocaleString('pt-BR', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+            hour: '2-digit', minute: '2-digit'
+        });
+    } catch (e) {
+        prazoTexto = '24 horas após a reserva';
+    }
 
-            navigator.clipboard.writeText(message).then(() => {
-                showToast('✅ Dados da transação copiados! Cole no WhatsApp.', 'success');
-            }).catch(err => {
-                console.error('Erro ao copiar:', err);
-                const textarea = document.createElement('textarea');
-                textarea.value = message;
-                document.body.appendChild(textarea);
-                textarea.select();
-                document.execCommand('copy');
-                document.body.removeChild(textarea);
-                showToast('✅ Dados copiados! Cole no WhatsApp.', 'success');
-            });
-        }
+    return `⏳ *RESERVA FEITA — PAGAMENTO PENDENTE* ⏳
 
+Olá, ${name}! Sua reserva foi registrada, mas *ainda não está confirmada*. 
+Para participar da rifa, é necessário efetuar o pagamento. 👇
+
+🆔 *ID da Reserva:* ${id}
+👤 *Comprador:* ${name}
+📱 *Telefone:* ${phone}
+📅 *Data da Reserva:* ${date}
+💰 *Valor a pagar:* R$ ${totalFormatado}
+🔢 *Bilhete(s) reservado(s):* ${numbers}
+
+━━━━━━━━━━━━━━━━━━━━
+⚠️ *ATENÇÃO: ESTES NÚMEROS AINDA NÃO SÃO SEUS*
+━━━━━━━━━━━━━━━━━━━━
+
+✅ *PRÓXIMO PASSO — Como confirmar sua participação:*
+1️⃣ Faça o PIX de *R$ ${totalFormatado}* para a chave:
+    📲 *(12) 99747-3756* (Jéssica)
+2️⃣ Envie o *comprovante* nesta conversa.
+3️⃣ Após a confirmação, você receberá a mensagem 
+    "✅ PAGAMENTO CONFIRMADO" e seus números estarão 
+    garantidos no sorteio.
+
+⏰ *Prazo:* Reservas não pagas até *${prazoTexto}* são 
+canceladas automaticamente e os números voltam a ficar 
+disponíveis para outros participantes.
+
+❓ Dúvidas? Fale comigo por aqui mesmo.
+Boa sorte! 🍀`;
+}
+
+function copyTransactionDetails() {
+    if (!currentTransactionId) {
+        showToast('⚠️ Nenhuma transação carregada para copiar.', 'error');
+        return;
+    }
+
+    const message = buildTransactionMessage();
+
+    navigator.clipboard.writeText(message).then(() => {
+        showToast('✅ Dados da transação copiados! Cole no WhatsApp.', 'success');
+    }).catch(err => {
+        console.error('Erro ao copiar:', err);
+        const textarea = document.createElement('textarea');
+        textarea.value = message;
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+        showToast('✅ Dados copiados! Cole no WhatsApp.', 'success');
+    });
+}
+
+function sendWhatsApp() {
+    if (!currentTransactionId) {
+        showToast('⚠️ Nenhuma transação carregada.', 'error');
+        return;
+    }
+
+    // Pega o telefone direto do campo exibido (já está atualizado)
+    const phoneRaw = elements.resultClientPhoneDisplay.textContent || '';
+    const digits = phoneRaw.replace(/\D/g, '');
+
+    if (digits.length < 10) {
+        showToast('⚠️ Telefone do comprador inválido ou não cadastrado.', 'error');
+        return;
+    }
+
+    // Garante DDI 55 (Brasil) — não duplica se já tiver
+    const phoneWithDDI = digits.startsWith('55') ? digits : '55' + digits;
+
+    const message = buildTransactionMessage();
+    const url = `https://wa.me/${phoneWithDDI}?text=${encodeURIComponent(message)}`;
+
+    window.open(url, '_blank');
+    showToast('📲 WhatsApp aberto com a mensagem pronta.', 'success');
+}
         function markTransactionPaid() {
             if (!currentTransactionId) return;
             if (!confirm(`Marcar transação ${currentTransactionId} como paga?`)) return;
