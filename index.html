@@ -2367,56 +2367,17 @@ function buildTransactionMessage() {
     const numberElements = elements.resultNumbers.querySelectorAll('.transaction-number');
     const numbers = Array.from(numberElements).map(el => el.textContent).join(', ');
 
-    // Formata valor com vírgula (padrão brasileiro)
-    const totalFormatado = total.replace('.', ',');
+    return `TRANSAÇÃO EM ANDAMENTO
 
-    // Calcula data limite (24h após a data da transação)
-    let prazoTexto = '';
-    try {
-        // Tenta parsear a data no formato pt-BR (dd/mm/aaaa, hh:mm:ss)
-        const [dataPart, horaPart] = date.split(', ');
-        const [dia, mes, ano] = dataPart.split('/').map(Number);
-        const [hora, minuto] = horaPart.split(':').map(Number);
-        const dataTx = new Date(ano, mes - 1, dia, hora, minuto);
-        const dataLimite = new Date(dataTx.getTime() + 24 * 60 * 60 * 1000);
-        prazoTexto = dataLimite.toLocaleString('pt-BR', {
-            day: '2-digit', month: '2-digit', year: 'numeric',
-            hour: '2-digit', minute: '2-digit'
-        });
-    } catch (e) {
-        prazoTexto = '24 horas após a reserva';
-    }
+🆔 ID: ${id}
+👤 Comprador: ${name}
+📱 Telefone: ${phone}
+📅 Data: ${date}
+💰 Valor: R$ ${total}
+🔢 Bilhete(s): ${numbers}
 
-    return `⏳ *RESERVA FEITA — PAGAMENTO PENDENTE* ⏳
-
-Olá, ${name}! Sua reserva foi registrada, mas *ainda não está confirmada*. 
-Para participar da rifa, é necessário efetuar o pagamento. 👇
-
-🆔 *ID da Reserva:* ${id}
-👤 *Comprador:* ${name}
-📱 *Telefone:* ${phone}
-📅 *Data da Reserva:* ${date}
-💰 *Valor a pagar:* R$ ${totalFormatado}
-🔢 *Bilhete(s) reservado(s):* ${numbers}
-
-━━━━━━━━━━━━━━━━━━━━
-⚠️ *ATENÇÃO: ESTES NÚMEROS AINDA NÃO SÃO SEUS*
-━━━━━━━━━━━━━━━━━━━━
-
-✅ *PRÓXIMO PASSO — Como confirmar sua participação:*
-1️⃣ Faça o PIX de *R$ ${totalFormatado}* para a chave:
-    📲 *(12) 99747-3756* (Jéssica)
-2️⃣ Envie o *comprovante* nesta conversa.
-3️⃣ Após a confirmação, você receberá a mensagem 
-    "✅ PAGAMENTO CONFIRMADO" e seus números estarão 
-    garantidos no sorteio.
-
-⏰ *Prazo:* Reservas não pagas até *${prazoTexto}* são 
-canceladas automaticamente e os números voltam a ficar 
-disponíveis para outros participantes.
-
-❓ Dúvidas? Fale comigo por aqui mesmo.
-Boa sorte! 🍀`;
+📌 Status: Aguardando pagamento
+💳 PIX: (12) 99747-3756`;
 }
 
 function copyTransactionDetails() {
